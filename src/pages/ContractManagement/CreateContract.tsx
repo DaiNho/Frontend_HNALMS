@@ -30,7 +30,7 @@ import toastr from "toastr";
 import "toastr/build/toastr.min.css";
 
 // Mock API URL - Replace with actual
-const API_URL = "http://localhost:9999/api";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:9999/api";
 
 /** Ngày bắt đầu HĐ mới tối thiểu khi từ chối gia hạn: ngày liền sau endDate của HĐ đang hiệu lực. */
 function getMinStartDateAfterDeclinedRenewal(room: {

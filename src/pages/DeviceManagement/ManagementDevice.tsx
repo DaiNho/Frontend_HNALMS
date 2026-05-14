@@ -14,7 +14,7 @@ import { AppModal } from '../../components/common/Modal';
 import { Pagination } from '../../components/common/Pagination';
 import { useToast } from '../../components/common/Toast';
 
-const API_BASE_URL = 'http://localhost:9999/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:9999/api';
 
 interface Device {
   _id: string;

@@ -11,7 +11,7 @@ import "./layout-preview.css";
 import { AppModal } from '../../../components/common/Modal';
 import { useToast } from '../../../components/common/Toast';
 
-const API_BASE_URL = "http://localhost:9999/api";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:9999/api";
 
 const IMAGE_LABELS = [
   "Ảnh tổng quan", "Ảnh bếp", "Ảnh giường", "Ảnh bàn học",

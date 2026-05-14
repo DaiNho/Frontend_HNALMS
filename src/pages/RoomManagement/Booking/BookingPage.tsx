@@ -501,7 +501,7 @@ export default function BookingPage() {
       let dupData: any = null;
       try {
         const dupRes = await axios.post(
-          "http://localhost:9999/api/booking-requests/check-duplicate",
+          `${import.meta.env.VITE_API_URL || 'http://localhost:9999/api'}/booking-requests/check-duplicate`,
           {
             cccd: idCard.trim(),
             phone: phone.trim(),

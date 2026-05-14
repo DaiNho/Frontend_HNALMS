@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Box,
   Button,
@@ -32,7 +32,7 @@ import { useToast } from "../../components/common/Toast";
 import "../RequestManagement/BookingRequestList.css";
 
 // Mock API URL - Replace with actual
-const API_URL = "http://localhost:9999/api";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:9999/api";
 
 /** Ngày bắt đầu HĐ mới tối thiểu khi từ chối gia hạn: ngày liền sau endDate của HĐ đang hiệu lực. */
 function getMinStartDateAfterDeclinedRenewal(room: {

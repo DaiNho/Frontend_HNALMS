@@ -20,7 +20,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
 import PrintIcon from "@mui/icons-material/Print";
 
-const API_URL = "http://localhost:9999/api";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:9999/api";
 
 // Self-contained Deposit Modal that fetches data on-demand
 function DepositModal({ open, onClose, depositId, serifFont }: {

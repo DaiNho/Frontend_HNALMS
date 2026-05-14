@@ -21,7 +21,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import toastr from "toastr";
 import "toastr/build/toastr.min.css";
 
-const API_URL = "http://localhost:9999/api";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:9999/api";
 
 interface CoResident {
   fullName: string;

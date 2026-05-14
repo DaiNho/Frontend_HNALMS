@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import "./LiquidationWizard.css";
 
-const API_BASE_URL = "http://localhost:9999/api";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:9999/api";
 
 const formatCurrency = (amount: number | null | undefined): string => {
   if (amount === null || amount === undefined) return "---";

@@ -45,7 +45,7 @@ import { AppModal } from "../../../components/common/Modal";
 import BulkLiquidationModal from "../RoomList/components/BulkLiquidationModal";
 import * as XLSX from "xlsx";
 
-const API_BASE_URL = "http://localhost:9999/api";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:9999/api";
 
 // --- INTERFACES ---
 interface Floor {

@@ -194,7 +194,7 @@ export default function CreateDeposit() {
 
       // Call API to create deposit
       const response = await axios.post(
-        "http://localhost:9999/api/deposits",
+        `${import.meta.env.VITE_API_URL || 'http://localhost:9999/api'}/deposits`,
         {
           name: fullName,
           email: email,

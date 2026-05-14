@@ -8,7 +8,7 @@ import { useToast } from "../../../../components/common/Toast";
 import { Upload, X } from "lucide-react";
 import "./BulkLiquidationModal.css";
 
-const API_BASE_URL = "http://localhost:9999/api";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:9999/api";
 
 interface Room {
   _id: string;

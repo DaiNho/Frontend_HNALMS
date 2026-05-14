@@ -258,7 +258,7 @@ const DepositRoom = () => {
   const handleSaveEdit = async () => {
     if (!selectedDeposit) return;
     try {
-      const response = await axios.put(`http://localhost:9999/api/deposits/${selectedDeposit._id}`, {
+      const response = await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:9999/api'}/deposits/${selectedDeposit._id}`, {
         name: editForm.name,
         phone: editForm.phone,
         email: editForm.email,
@@ -269,7 +269,7 @@ const DepositRoom = () => {
         toastr.success("Cập nhật thành công");
         setIsEditModalOpen(false);
         // Refresh deposits
-        const fetchResponse = await axios.get("http://localhost:9999/api/deposits", { withCredentials: true });
+        const fetchResponse = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:9999/api'}/deposits`, { withCredentials: true });
         if (fetchResponse.data.success) {
           setDeposits(fetchResponse.data.data);
         }
@@ -295,7 +295,7 @@ const DepositRoom = () => {
   useEffect(() => {
     const fetchDeposits = async () => {
       try {
-        const response = await axios.get("http://localhost:9999/api/deposits", {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:9999/api'}/deposits`, {
           withCredentials: true,
         });
         if (response.data.success) {

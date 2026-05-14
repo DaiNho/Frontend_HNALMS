@@ -18,7 +18,7 @@ import { AppModal } from "../../components/common/Modal";
 import { useToast } from "../../components/common/Toast";
 import { Pagination } from "../../components/common/Pagination";
 
-const API_BASE_URL = 'http://localhost:9999/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:9999/api';
 
 interface InvoiceItem {
   itemName: string;

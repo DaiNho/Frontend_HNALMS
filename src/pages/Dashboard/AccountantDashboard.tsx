@@ -12,7 +12,7 @@ import toastr from 'toastr';
 import 'toastr/build/toastr.min.css';
 import './AccountantDashboard.css';
 
-const API_BASE_URL = 'http://localhost:9999/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:9999/api';
 const COLORS = ['#3b82f6', '#ec4899', '#f59e0b', '#10b981', '#8b5cf6', '#ef4444'];
 
 const AccountantDashboard = () => {
