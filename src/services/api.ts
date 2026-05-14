@@ -2,7 +2,7 @@ import axios from "axios";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:9999/api",
-  timeout: 10000,
+  timeout: 30000, // 30s để hỗ trợ Render.com cold start (free tier ngủ sau 15p không dùng)
   headers: {
     "Content-Type": "application/json",
   },
@@ -57,16 +57,29 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Log error details for debugging
-    console.error("API Error:", {
-      url: error.config?.url,
-      method: error.config?.method,
-      status: error.response?.status,
-      statusText: error.response?.statusText,
-      message: error.response?.data?.message,
-      hasToken: !!localStorage.getItem("token"),
-      currentPath: window.location.pathname,
-    });
+    // Phân biệt network error (không có response) vs HTTP error (có response)
+    if (!error.response) {
+      // Network error: CORS bị chặn, server offline, timeout, DNS fail...
+      console.error("API Network Error:", {
+        url: error.config?.url,
+        method: error.config?.method,
+        message: error.message,           // Hiển thị "Network Error", "timeout of 30000ms exceeded", v.v.
+        code: error.code,                 // "ERR_NETWORK", "ECONNABORTED", v.v.
+        baseURL: error.config?.baseURL,
+        hint: "Có thể backend đang cold start (Render free tier), CORS bị chặn, hoặc mất kết nối",
+      });
+    } else {
+      // HTTP error: server phản hồi nhưng với status code lỗi (4xx, 5xx)
+      console.error("API HTTP Error:", {
+        url: error.config?.url,
+        method: error.config?.method,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        message: error.response?.data?.message,
+        hasToken: !!localStorage.getItem("token"),
+        currentPath: window.location.pathname,
+      });
+    }
 
     if (error.response?.status === 401) {
       const currentPath = window.location.pathname;
