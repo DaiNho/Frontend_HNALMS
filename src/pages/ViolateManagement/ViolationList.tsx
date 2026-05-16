@@ -102,9 +102,9 @@ export default function ViolationList() {
     }
   }, []);
 
-  const fetchViolations = useCallback(async () => {
+  const fetchViolations = useCallback(async (isBackground = false) => {
     try {
-      setLoading(true);
+      if (!isBackground) setLoading(true);
       const response = await violateService.getViolations({
         status: statusFilter === 'ALL' ? undefined : statusFilter,
         page: currentPage,
@@ -125,10 +125,12 @@ export default function ViolationList() {
       }
     } catch (err: unknown) {
       console.error('Lỗi khi tải danh sách vi phạm:', err);
-      const e = err as { response?: { data?: { message?: string } } };
-      showToast('error', 'Lỗi', e.response?.data?.message || 'Không thể tải danh sách vi phạm.');
+      if (!isBackground) {
+        const e = err as { response?: { data?: { message?: string } } };
+        showToast('error', 'Lỗi', e.response?.data?.message || 'Không thể tải danh sách vi phạm.');
+      }
     } finally {
-      setLoading(false);
+      if (!isBackground) setLoading(false);
     }
   }, [statusFilter, currentPage, showToast]);
 
@@ -137,8 +139,8 @@ export default function ViolationList() {
   }, [fetchViolations]);
 
   useEffect(() => {
-    const cleanup = listenForDataChanges(fetchViolations, ['VIOLATIONS_UPDATED', 'ALL_UPDATED']);
-    const interval = setInterval(fetchViolations, 30_000);
+    const cleanup = listenForDataChanges(() => fetchViolations(true), ['VIOLATIONS_UPDATED', 'ALL_UPDATED']);
+    const interval = setInterval(() => fetchViolations(true), 30_000);
     return () => {
       cleanup();
       clearInterval(interval);

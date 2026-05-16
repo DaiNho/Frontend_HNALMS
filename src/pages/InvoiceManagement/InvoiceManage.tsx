@@ -131,8 +131,8 @@ const InvoiceManager = () => {
     }
   }, []);
 
-  const fetchInvoices = useCallback(async () => {
-    setLoading(true);
+  const fetchInvoices = useCallback(async (isBackground = false) => {
+    if (!isBackground) setLoading(true);
     try {
       const [periodicRes, incurredRes] = await Promise.all([
         axios.get(`${API_BASE_URL}/invoices/periodic`).catch(() => ({ data: { data: [] } })),
@@ -151,7 +151,7 @@ const InvoiceManager = () => {
     } catch (error) {
       showToast('error', 'Lỗi tải dữ liệu', 'Không thể tải danh sách hóa đơn.');
     }
-    finally { setLoading(false); }
+    finally { if (!isBackground) setLoading(false); }
   }, [showToast]);
 
   useEffect(() => {
@@ -169,8 +169,8 @@ const InvoiceManager = () => {
   }, [bulkSearchTerm, bulkFilterStatus, bulkFilterFloor]);
 
   useEffect(() => {
-    const cleanup = listenForDataChanges(fetchInvoices, ['INVOICES_UPDATED', 'ALL_UPDATED']);
-    const interval = setInterval(fetchInvoices, 30_000);
+    const cleanup = listenForDataChanges(() => fetchInvoices(true), ['INVOICES_UPDATED', 'ALL_UPDATED']);
+    const interval = setInterval(() => fetchInvoices(true), 30_000);
     return () => {
       cleanup();
       clearInterval(interval);
@@ -424,7 +424,7 @@ const InvoiceManager = () => {
     }
 
     try {
-      setLoading(true);
+      if (!isBackground) setLoading(true);
       for (const payload of apiCalls) {
         await axios.post(`${API_BASE_URL}/meter-readings`, payload);
       }
@@ -435,7 +435,7 @@ const InvoiceManager = () => {
     } catch (error: any) {
       showToast('error', 'Lỗi', 'Có lỗi xảy ra khi lưu chỉ số hàng loạt.');
     } finally {
-      setLoading(false);
+      if (!isBackground) setLoading(false);
     }
   };
 
@@ -461,7 +461,7 @@ const InvoiceManager = () => {
         return;
       }
 
-      setLoading(true);
+      if (!isBackground) setLoading(true);
       for (const id of idsToRelease) {
         const inv = invoices.find(i => i._id === id);
         const endpoint = inv?.type === 'Periodic' ? 'periodic' : 'incurred';
@@ -474,7 +474,7 @@ const InvoiceManager = () => {
     } catch (error: any) {
       showToast('error', 'Lỗi', 'Có lỗi xảy ra trong quá trình phát hành.');
     } finally {
-      setLoading(false);
+      if (!isBackground) setLoading(false);
     }
   };
 

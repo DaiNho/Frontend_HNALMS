@@ -74,15 +74,15 @@ const ManageService = () => {
     fetchServices();
   }, []);
 
-  const fetchServices = async () => {
-    setLoading(true);
+  const fetchServices = async (isBackground = false) => {
+    if (!isBackground) setLoading(true);
     try {
       const res = await axios.get(`${API_BASE_URL}/services`);
       setServices(res.data.data || res.data || []);
     } catch {
-      showToast('error', "Lỗi kết nối", "Không thể tải danh sách dịch vụ!");
+      if (!isBackground) showToast('error', "Lỗi kết nối", "Không thể tải danh sách dịch vụ!");
     } finally {
-      setLoading(false);
+      if (!isBackground) setLoading(false);
     }
   };
 
@@ -92,8 +92,8 @@ const ManageService = () => {
   }, [searchTerm, filterType, filterPrice, sortOption]);
 
   useEffect(() => {
-    const cleanup = listenForDataChanges(fetchServices, ['SERVICES_UPDATED', 'ALL_UPDATED']);
-    const interval = setInterval(fetchServices, 30_000);
+    const cleanup = listenForDataChanges(() => fetchServices(true), ['SERVICES_UPDATED', 'ALL_UPDATED']);
+    const interval = setInterval(() => fetchServices(true), 30_000);
     return () => {
       cleanup();
       clearInterval(interval);

@@ -161,9 +161,9 @@ export default function TransferRequestsList() {
 
   const tableRef = useRef<HTMLDivElement | null>(null);
 
-  const fetchRequests = useCallback(async () => {
+  const fetchRequests = useCallback(async (isBackground = false) => {
     try {
-      setLoading(true);
+      if (!isBackground) setLoading(true);
       const res = await transferRequestService.getAllTransferRequests({
         status: statusFilter === 'ALL' ? undefined : statusFilter,
         search: search || undefined,
@@ -183,7 +183,7 @@ export default function TransferRequestsList() {
       const anyErr = err as { response?: { data?: { message?: string } } };
       showToast('error', 'Lỗi tải dữ liệu', anyErr?.response?.data?.message || 'Không thể tải danh sách yêu cầu chuyển phòng');
     } finally {
-      setLoading(false);
+      if (!isBackground) setLoading(false);
     }
   }, [statusFilter, search, currentPage, itemsPerPage, showToast]);
 
@@ -191,8 +191,8 @@ export default function TransferRequestsList() {
   useEffect(() => { setCurrentPage(1); }, [statusFilter, search]);
 
   useEffect(() => {
-    const cleanup = listenForDataChanges(fetchRequests, ['REQUESTS_UPDATED', 'ALL_UPDATED']);
-    const interval = setInterval(fetchRequests, 30_000);
+    const cleanup = listenForDataChanges(() => fetchRequests(true), ['REQUESTS_UPDATED', 'ALL_UPDATED']);
+    const interval = setInterval(() => fetchRequests(true), 30_000);
     return () => {
       cleanup();
       clearInterval(interval);

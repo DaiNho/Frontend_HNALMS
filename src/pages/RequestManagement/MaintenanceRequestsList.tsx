@@ -82,9 +82,9 @@ export default function MaintenanceRequestsList() {
   const { isManager } = useAuth();
   const tableRef = useRef<HTMLDivElement | null>(null);
 
-  const fetchRequests = useCallback(async () => {
+  const fetchRequests = useCallback(async (isBackground = false) => {
     try {
-      setLoading(true);
+      if (!isBackground) setLoading(true);
       const response = await requestService.getRepairRequests(
         roomSearch,
         tenantSearch,
@@ -102,7 +102,7 @@ export default function MaintenanceRequestsList() {
       const e = err as { response?: { data?: { message?: string } } };
       showToast('error', 'Lỗi', e.response?.data?.message || 'Không thể tải danh sách yêu cầu bảo trì.');
     } finally {
-      setLoading(false);
+      if (!isBackground) setLoading(false);
     }
   }, [roomSearch, tenantSearch, currentPage, showToast]);
 
@@ -111,8 +111,8 @@ export default function MaintenanceRequestsList() {
   }, [fetchRequests]);
 
   useEffect(() => {
-    const cleanup = listenForDataChanges(fetchRequests, ['REQUESTS_UPDATED', 'ALL_UPDATED']);
-    const interval = setInterval(fetchRequests, 30_000);
+    const cleanup = listenForDataChanges(() => fetchRequests(true), ['REQUESTS_UPDATED', 'ALL_UPDATED']);
+    const interval = setInterval(() => fetchRequests(true), 30_000);
     return () => {
       cleanup();
       clearInterval(interval);

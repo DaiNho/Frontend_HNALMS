@@ -165,8 +165,8 @@ const ManageRoom: React.FC<ManageRoomProps> = ({ readOnly = false }) => {
   const canLiquidate = userRole === "manager" || userRole === "owner";
 
   // --- FETCH DATA ---
-  const fetchData = async () => {
-    setLoading(true);
+  const fetchData = async (isBackground = false) => {
+    if (!isBackground) setLoading(true);
     try {
       const [roomsRes, floorsRes, typesRes, contractsRes, depositsRes] =
         await Promise.all([
@@ -195,7 +195,7 @@ const ManageRoom: React.FC<ManageRoomProps> = ({ readOnly = false }) => {
       console.error("Lỗi tải dữ liệu:", error);
       showToast("error", "Lỗi hệ thống", "Không thể tải dữ liệu từ máy chủ.");
     } finally {
-      setLoading(false);
+      if (!isBackground) setLoading(false);
     }
   };
 
@@ -205,7 +205,7 @@ const ManageRoom: React.FC<ManageRoomProps> = ({ readOnly = false }) => {
 
   // Lắng nghe sự kiện từ các tab khác (owner thêm tầng/loại phòng/phòng)
   useEffect(() => {
-    const cleanup = listenForDataChanges(fetchData, [
+    const cleanup = listenForDataChanges(() => fetchData(true), [
       'FLOORS_UPDATED',
       'ROOM_TYPES_UPDATED',
       'ROOMS_UPDATED',
@@ -215,7 +215,7 @@ const ManageRoom: React.FC<ManageRoomProps> = ({ readOnly = false }) => {
 
   // Polling 30 giây — đồng bộ giữa các thiết bị khác nhau
   useEffect(() => {
-    const interval = setInterval(fetchData, 30_000);
+    const interval = setInterval(() => fetchData(true), 30_000);
     return () => clearInterval(interval);
   }, []);
 
@@ -402,7 +402,7 @@ const ManageRoom: React.FC<ManageRoomProps> = ({ readOnly = false }) => {
     formData.append("file", selectedFile);
 
     try {
-      setLoading(true);
+      if (!isBackground) setLoading(true);
       const res = await axios.post(`${API_BASE_URL}/excel/import`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
@@ -421,7 +421,7 @@ const ManageRoom: React.FC<ManageRoomProps> = ({ readOnly = false }) => {
         showToast("error", "Lỗi", msg);
       }
     } finally {
-      setLoading(false);
+      if (!isBackground) setLoading(false);
     }
   };
 

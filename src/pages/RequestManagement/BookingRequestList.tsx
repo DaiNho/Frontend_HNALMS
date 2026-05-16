@@ -122,7 +122,7 @@ const BookingRequestList = () => {
 
   const fetchRequests = useCallback(async (silent = false) => {
     try {
-      if (!silent) setLoading(true);
+      if (!silent) if (!isBackground) setLoading(true);
       const responseData = await bookingRequestService.getAllBookingRequests();
       if (responseData.success) {
         setRequests(responseData.data);
@@ -140,7 +140,7 @@ const BookingRequestList = () => {
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Đã xảy ra lỗi");
     } finally {
-      if (!silent) setLoading(false);
+      if (!silent) if (!isBackground) setLoading(false);
     }
   }, []);
 
@@ -149,8 +149,8 @@ const BookingRequestList = () => {
   }, [fetchRequests]);
 
   useEffect(() => {
-    const cleanup = listenForDataChanges(fetchRequests, ['REQUESTS_UPDATED', 'ALL_UPDATED']);
-    const interval = setInterval(fetchRequests, 30_000);
+    const cleanup = listenForDataChanges(() => fetchRequests(true), ['REQUESTS_UPDATED', 'ALL_UPDATED']);
+    const interval = setInterval(() => fetchRequests(true), 30_000);
     return () => {
       cleanup();
       clearInterval(interval);
@@ -158,8 +158,8 @@ const BookingRequestList = () => {
   }, [fetchRequests]);
 
   useEffect(() => {
-    const cleanup = listenForDataChanges(fetchRequests, ['REQUESTS_UPDATED', 'ALL_UPDATED']);
-    const interval = setInterval(fetchRequests, 30_000);
+    const cleanup = listenForDataChanges(() => fetchRequests(true), ['REQUESTS_UPDATED', 'ALL_UPDATED']);
+    const interval = setInterval(() => fetchRequests(true), 30_000);
     return () => {
       cleanup();
       clearInterval(interval);

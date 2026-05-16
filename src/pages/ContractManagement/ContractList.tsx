@@ -212,7 +212,7 @@ const ContractList = ({ readOnly = false }: { readOnly?: boolean }) => {
 
   useEffect(() => {
     const cleanup = listenForDataChanges(fetchData);
-    const interval = setInterval(fetchData, 30_000);
+    const interval = setInterval(() => fetchData(true), 30_000);
     return () => {
       cleanup();
       clearInterval(interval);

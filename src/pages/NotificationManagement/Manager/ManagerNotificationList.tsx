@@ -40,9 +40,9 @@ export default function ManagerNotificationList() {
   const [publishNotification, setPublishNotification] = useState<Notification | null>(null);
   const [isPublishing, setIsPublishing] = useState(false);
 
-  const fetchNotifications = async () => {
+  const fetchNotifications = async (isBackground = false) => {
     try {
-      setLoading(true);
+      if (!isBackground) setLoading(true);
       const statusFilter =
         activeTab === 'DRAFT' ? 'draft' :
           activeTab === 'SENT' ? 'sent' : undefined;
@@ -65,7 +65,7 @@ export default function ManagerNotificationList() {
       const e = err as { response?: { data?: { message?: string } } };
       showToast('error', 'Lỗi', e.response?.data?.message || 'Không thể tải danh sách thông báo.');
     } finally {
-      setLoading(false);
+      if (!isBackground) setLoading(false);
     }
   };
 
@@ -79,8 +79,8 @@ export default function ManagerNotificationList() {
   }, [searchTerm, activeTab, fromDate, toDate]);
 
   useEffect(() => {
-    const cleanup = listenForDataChanges(fetchNotifications, ['NOTIFICATIONS_UPDATED', 'ALL_UPDATED']);
-    const interval = setInterval(fetchNotifications, 30_000);
+    const cleanup = listenForDataChanges(() => fetchNotifications(true), ['NOTIFICATIONS_UPDATED', 'ALL_UPDATED']);
+    const interval = setInterval(() => fetchNotifications(true), 30_000);
     return () => {
       cleanup();
       clearInterval(interval);

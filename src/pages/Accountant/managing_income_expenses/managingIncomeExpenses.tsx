@@ -84,7 +84,7 @@ export default function ManagingIncomeExpenses() {
 
   const fetchTickets = useCallback(async (): Promise<void> => {
     try {
-      setLoading(true);
+      if (!isBackground) setLoading(true);
       setError(null);
 
       const params: { from?: string; to?: string } = {};
@@ -118,7 +118,7 @@ export default function ManagingIncomeExpenses() {
       }
       showToast("error", "Lỗi kết nối", msg);
     } finally {
-      setLoading(false);
+      if (!isBackground) setLoading(false);
     }
   }, [fromDate, toDate]);
 
@@ -127,8 +127,8 @@ export default function ManagingIncomeExpenses() {
   }, [fetchTickets]);
 
   useEffect(() => {
-    const cleanup = listenForDataChanges(fetchTickets, ['CASHFLOW_UPDATED', 'ALL_UPDATED']);
-    const interval = setInterval(fetchTickets, 30_000);
+    const cleanup = listenForDataChanges(() => fetchTickets(true), ['CASHFLOW_UPDATED', 'ALL_UPDATED']);
+    const interval = setInterval(() => fetchTickets(true), 30_000);
     return () => {
       cleanup();
       clearInterval(interval);

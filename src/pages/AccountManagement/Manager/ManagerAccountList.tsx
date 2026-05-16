@@ -77,9 +77,9 @@ export default function ManagerAccountList() {
   });
   const [createSaving, setCreateSaving] = useState(false);
 
-  const fetchAccounts = useCallback(async () => {
+  const fetchAccounts = useCallback(async (isBackground = false) => {
     try {
-      setLoading(true);
+      if (!isBackground) setLoading(true);
       setError(null);
       const offset = (currentPage - 1) * limit;
       const response = await accountService.list('managers', { offset, limit });
@@ -98,13 +98,13 @@ export default function ManagerAccountList() {
       setAccounts([]);
       showToast('error', 'Lỗi', msg);
     } finally {
-      setLoading(false);
+      if (!isBackground) setLoading(false);
     }
   }, [currentPage, limit, showToast]);
 
   useEffect(() => {
-    const cleanup = listenForDataChanges(fetchAccounts, ['ACCOUNTS_UPDATED', 'ALL_UPDATED']);
-    const interval = setInterval(fetchAccounts, 30_000);
+    const cleanup = listenForDataChanges(() => fetchAccounts(true), ['ACCOUNTS_UPDATED', 'ALL_UPDATED']);
+    const interval = setInterval(() => fetchAccounts(true), 30_000);
     return () => {
       cleanup();
       clearInterval(interval);

@@ -74,8 +74,8 @@ const BuildingRulesPublic = () => {
   }>({ isOpen: false, type: null, index: null, title: "" });
 
   useEffect(() => {
-    const cleanup = listenForDataChanges(fetchRules, ['RULES_UPDATED', 'ALL_UPDATED']);
-    const interval = setInterval(fetchRules, 30_000);
+    const cleanup = listenForDataChanges(() => fetchRules(true), ['RULES_UPDATED', 'ALL_UPDATED']);
+    const interval = setInterval(() => fetchRules(true), 30_000);
     return () => {
       cleanup();
       clearInterval(interval);
@@ -85,9 +85,9 @@ const BuildingRulesPublic = () => {
   /**
    * Gọi API lấy dữ liệu nội quy từ backend
    */
-  const fetchRules = async () => {
+  const fetchRules = async (isBackground = false) => {
     try {
-      setLoading(true);
+      if (!isBackground) setLoading(true);
       const response = await getActiveBuildingRules();
       setRulesData(response.data);
       setError(null);
@@ -95,7 +95,7 @@ const BuildingRulesPublic = () => {
       console.error("Error fetching rules:", err);
       setError("Không thể tải nội quy tòa nhà. Vui lòng thử lại sau.");
     } finally {
-      setLoading(false);
+      if (!isBackground) setLoading(false);
     }
   };
 

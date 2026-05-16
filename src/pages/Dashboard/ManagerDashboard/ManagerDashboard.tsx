@@ -54,17 +54,17 @@ export default function ManagerDashboard() {
 
   // Lắng nghe sự kiện từ các tab khác + polling 30s
   useEffect(() => {
-    const cleanup = listenForDataChanges(loadDashboardData);
-    const interval = setInterval(loadDashboardData, 30_000);
+    const cleanup = listenForDataChanges(() => loadDashboardData(true));
+    const interval = setInterval(() => loadDashboardData(true), 30_000);
     return () => {
       cleanup();
       clearInterval(interval);
     };
   }, []);
 
-  const loadDashboardData = async () => {
+  const loadDashboardData = async (isBackground = false) => {
     try {
-      setLoading(true);
+      if (!isBackground) setLoading(true);
 
       // Fetch rooms, contracts, deposits and requests in parallel
       const [
@@ -180,7 +180,7 @@ export default function ManagerDashboard() {
         depositsWithoutContract: 0,
       });
     } finally {
-      setLoading(false);
+      if (!isBackground) setLoading(false);
     }
   };
 

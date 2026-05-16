@@ -176,9 +176,9 @@ export default function MoveOutRequestsList() {
   const [completeLoading, setCompleteLoading] = useState(false);
 
   // ─── Fetch ───────────────────────────────────────────────────────────────
-  const fetchRequests = useCallback(async () => {
+  const fetchRequests = useCallback(async (isBackground = false) => {
     try {
-      setLoading(true);
+      if (!isBackground) setLoading(true);
       const res = await moveOutService.getAllMoveOutRequests({
         status: statusFilter === 'ALL' ? undefined : statusFilter,
         search: search || undefined,
@@ -198,7 +198,7 @@ export default function MoveOutRequestsList() {
       const anyErr = err as { response?: { data?: { message?: string } } };
       showToast('error', 'Lỗi tải dữ liệu', anyErr?.response?.data?.message || 'Không thể tải danh sách yêu cầu trả phòng');
     } finally {
-      setLoading(false);
+      if (!isBackground) setLoading(false);
     }
   }, [statusFilter, search, currentPage, itemsPerPage, showToast]);
 
@@ -206,8 +206,8 @@ export default function MoveOutRequestsList() {
   useEffect(() => { setCurrentPage(1); }, [statusFilter, search]);
 
   useEffect(() => {
-    const cleanup = listenForDataChanges(fetchRequests, ['REQUESTS_UPDATED', 'ALL_UPDATED']);
-    const interval = setInterval(fetchRequests, 30_000);
+    const cleanup = listenForDataChanges(() => fetchRequests(true), ['REQUESTS_UPDATED', 'ALL_UPDATED']);
+    const interval = setInterval(() => fetchRequests(true), 30_000);
     return () => {
       cleanup();
       clearInterval(interval);
@@ -273,7 +273,7 @@ export default function MoveOutRequestsList() {
   // ─── Open detail ──────────────────────────────────────────────────────
   const openDetail = async (req: MoveOutRequestItem) => {
     try {
-      setLoading(true);
+      if (!isBackground) setLoading(true);
       const res = await moveOutService.getMoveOutRequestById(req._id);
       if (res.success && res.data) {
         setSelectedRequest(res.data);
@@ -283,7 +283,7 @@ export default function MoveOutRequestsList() {
     } catch {
       setSelectedRequest(req);
     } finally {
-      setLoading(false);
+      if (!isBackground) setLoading(false);
     }
     setDepositComparison(null);
     try {

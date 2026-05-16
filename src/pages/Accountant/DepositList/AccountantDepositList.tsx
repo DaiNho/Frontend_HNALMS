@@ -82,9 +82,9 @@ export default function AccountantDepositList() {
   const ROWS_PER_PAGE = 8;
   const [currentPage, setCurrentPage] = useState(1);
 
-  const fetchDeposits = useCallback(async () => {
+  const fetchDeposits = useCallback(async (isBackground = false) => {
     try {
-      setLoading(true);
+      if (!isBackground) setLoading(true);
       const response = await api.get("/deposits");
       if (response.data.success) {
         setDeposits(response.data.data);
@@ -99,7 +99,7 @@ export default function AccountantDepositList() {
           : "Đã xảy ra lỗi khi tải dữ liệu"
       );
     } finally {
-      setLoading(false);
+      if (!isBackground) setLoading(false);
     }
   }, []);
 
@@ -108,8 +108,8 @@ export default function AccountantDepositList() {
   }, [fetchDeposits]);
 
   useEffect(() => {
-    const cleanup = listenForDataChanges(fetchDeposits, ['DEPOSITS_UPDATED', 'ALL_UPDATED']);
-    const interval = setInterval(fetchDeposits, 30_000);
+    const cleanup = listenForDataChanges(() => fetchDeposits(true), ['DEPOSITS_UPDATED', 'ALL_UPDATED']);
+    const interval = setInterval(() => fetchDeposits(true), 30_000);
     return () => {
       cleanup();
       clearInterval(interval);

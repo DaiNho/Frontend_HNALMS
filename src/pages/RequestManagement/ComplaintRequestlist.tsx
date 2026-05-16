@@ -86,9 +86,9 @@ export default function ComplaintRequestList() {
     nextStatus: 'Pending' | 'Processing' | 'Done' | 'Rejected';
   } | null>(null);
 
-  const fetchComplaints = async () => {
+  const fetchComplaints = async (isBackground = false) => {
     try {
-      setLoading(true);
+      if (!isBackground) setLoading(true);
       const res = await complaintService.getComplaints({
         status: statusFilter === 'ALL' ? undefined : statusFilter,
         category: categoryFilter === 'ALL' ? undefined : categoryFilter,
@@ -105,7 +105,7 @@ export default function ComplaintRequestList() {
       const e = err as { response?: { data?: { error?: { message?: string } } } };
       showToast('error', 'Lỗi', e.response?.data?.error?.message || 'Không thể tải danh sách khiếu nại.');
     } finally {
-      setLoading(false);
+      if (!isBackground) setLoading(false);
     }
   };
 
@@ -115,8 +115,8 @@ export default function ComplaintRequestList() {
   }, [statusFilter, categoryFilter]);
 
   useEffect(() => {
-    const cleanup = listenForDataChanges(fetchComplaints, ['REQUESTS_UPDATED', 'ALL_UPDATED']);
-    const interval = setInterval(fetchComplaints, 30_000);
+    const cleanup = listenForDataChanges(() => fetchComplaints(true), ['REQUESTS_UPDATED', 'ALL_UPDATED']);
+    const interval = setInterval(() => fetchComplaints(true), 30_000);
     return () => {
       cleanup();
       clearInterval(interval);

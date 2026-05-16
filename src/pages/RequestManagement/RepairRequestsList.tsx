@@ -111,9 +111,9 @@ export default function RepairRequestsList() {
     }
   }, []);
 
-  const fetchRequests = useCallback(async () => {
+  const fetchRequests = useCallback(async (isBackground = false) => {
     try {
-      setLoading(true);
+      if (!isBackground) setLoading(true);
       const response = await requestService.getRepairRequests(
         roomSearch,
         tenantSearch,
@@ -135,7 +135,7 @@ export default function RepairRequestsList() {
       const e = err as { response?: { data?: { message?: string } } };
       showToast('error', 'Lỗi', e.response?.data?.message || 'Không thể tải danh sách yêu cầu sửa chữa.');
     } finally {
-      setLoading(false);
+      if (!isBackground) setLoading(false);
     }
   }, [roomSearch, tenantSearch, currentPage, showToast]);
 
@@ -144,8 +144,8 @@ export default function RepairRequestsList() {
   }, [fetchRequests]);
 
   useEffect(() => {
-    const cleanup = listenForDataChanges(fetchRequests, ['REQUESTS_UPDATED', 'ALL_UPDATED']);
-    const interval = setInterval(fetchRequests, 30_000);
+    const cleanup = listenForDataChanges(() => fetchRequests(true), ['REQUESTS_UPDATED', 'ALL_UPDATED']);
+    const interval = setInterval(() => fetchRequests(true), 30_000);
     return () => {
       cleanup();
       clearInterval(interval);

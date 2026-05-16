@@ -46,7 +46,7 @@ export default function ReceiptsList() {
 
   const fetchTickets = useCallback(async (): Promise<void> => {
     try {
-      setLoading(true);
+      if (!isBackground) setLoading(true);
       setError(null);
 
       type ApiResponse = {
@@ -87,7 +87,7 @@ export default function ReceiptsList() {
       }
       setError(msg);
     } finally {
-      setLoading(false);
+      if (!isBackground) setLoading(false);
     }
   }, [fromDate, toDate, statusFilter]);
 
@@ -96,8 +96,8 @@ export default function ReceiptsList() {
   }, [fetchTickets]);
 
   useEffect(() => {
-    const cleanup = listenForDataChanges(fetchTickets, ['CASHFLOW_UPDATED', 'ALL_UPDATED']);
-    const interval = setInterval(fetchTickets, 30_000);
+    const cleanup = listenForDataChanges(() => fetchTickets(true), ['CASHFLOW_UPDATED', 'ALL_UPDATED']);
+    const interval = setInterval(() => fetchTickets(true), 30_000);
     return () => {
       cleanup();
       clearInterval(interval);

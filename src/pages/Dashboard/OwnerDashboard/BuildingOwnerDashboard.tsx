@@ -42,17 +42,17 @@ export default function BuildingOwnerDashboard() {
 
   // Lắng nghe sự kiện từ các tab khác + polling 30s
   useEffect(() => {
-    const cleanup = listenForDataChanges(loadDashboardData);
-    const interval = setInterval(loadDashboardData, 30_000);
+    const cleanup = listenForDataChanges(() => loadDashboardData(true));
+    const interval = setInterval(() => loadDashboardData(true), 30_000);
     return () => {
       cleanup();
       clearInterval(interval);
     };
   }, []);
 
-  const loadDashboardData = async () => {
+  const loadDashboardData = async (isBackground = false) => {
     try {
-      setLoading(true);
+      if (!isBackground) setLoading(true);
 
       // Calculate date range for current month
       const now = new Date();
@@ -166,7 +166,7 @@ export default function BuildingOwnerDashboard() {
         occupancyRate: 0,
       });
     } finally {
-      setLoading(false);
+      if (!isBackground) setLoading(false);
     }
   };
 

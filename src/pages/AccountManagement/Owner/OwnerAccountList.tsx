@@ -72,9 +72,9 @@ export default function OwnerAccountList() {
     accountName: string;
   }>({ isOpen: false, type: null, accountId: null, accountName: '' });
 
-  const fetchAccounts = useCallback(async () => {
+  const fetchAccounts = useCallback(async (isBackground = false) => {
     try {
-      setLoading(true);
+      if (!isBackground) setLoading(true);
       setError(null);
       const offset = (page - 1) * ROWS_PER_PAGE;
       const response = await accountService.list('owners', { offset, limit: ROWS_PER_PAGE });
@@ -90,13 +90,13 @@ export default function OwnerAccountList() {
       setError(errObj?.response?.data?.message || 'Không thể tải danh sách');
       setAccounts([]);
     } finally {
-      setLoading(false);
+      if (!isBackground) setLoading(false);
     }
   }, [page]);
 
   useEffect(() => {
-    const cleanup = listenForDataChanges(fetchAccounts, ['ACCOUNTS_UPDATED', 'ALL_UPDATED']);
-    const interval = setInterval(fetchAccounts, 30_000);
+    const cleanup = listenForDataChanges(() => fetchAccounts(true), ['ACCOUNTS_UPDATED', 'ALL_UPDATED']);
+    const interval = setInterval(() => fetchAccounts(true), 30_000);
     return () => {
       cleanup();
       clearInterval(interval);

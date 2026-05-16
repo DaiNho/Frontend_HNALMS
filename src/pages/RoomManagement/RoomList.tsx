@@ -104,10 +104,10 @@ export default function RoomList() {
     if (!isInitialized) return;
 
     // BroadcastChannel: đồng bộ ngay giữa các tab
-    const cleanup = listenForDataChanges(fetchRooms, ['ROOMS_UPDATED', 'FLOORS_UPDATED', 'ROOM_TYPES_UPDATED']);
+    const cleanup = listenForDataChanges(() => fetchRooms(true), ['ROOMS_UPDATED', 'FLOORS_UPDATED', 'ROOM_TYPES_UPDATED']);
 
     // Polling 30 giây: đồng bộ giữa các thiết bị khác nhau
-    const interval = setInterval(fetchRooms, 30_000);
+    const interval = setInterval(() => fetchRooms(true), 30_000);
 
     return () => {
       cleanup();
@@ -154,8 +154,8 @@ export default function RoomList() {
     isInitialized,
   ]);
 
-  const fetchRooms = async () => {
-    setLoading(true);
+  const fetchRooms = async (isBackground = false) => {
+    if (!isBackground) setLoading(true);
     setError(null);
     try {
       const response = await roomService.getRooms();
@@ -272,7 +272,7 @@ export default function RoomList() {
       console.error("Error fetching rooms:", err);
       setError("Đã xảy ra lỗi khi tải dữ liệu");
     } finally {
-      setLoading(false);
+      if (!isBackground) setLoading(false);
     }
   };
 

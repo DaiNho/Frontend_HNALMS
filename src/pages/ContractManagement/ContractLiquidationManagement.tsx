@@ -625,8 +625,8 @@ const ContractLiquidationManagement: React.FC = () => {
   const PAGE_SIZE = 10;
 
   // ── Fetch data ──
-  const fetchLiquidations = async () => {
-    setLoading(true);
+  const fetchLiquidations = async (isBackground = false) => {
+    if (!isBackground) setLoading(true);
     try {
       const res = await liquidationService.getAll();
       if (res.success) {
@@ -635,13 +635,13 @@ const ContractLiquidationManagement: React.FC = () => {
     } catch (err: any) {
       toastr.error(err?.response?.data?.message || "Không thể tải danh sách thanh lý.");
     } finally {
-      setLoading(false);
+      if (!isBackground) setLoading(false);
     }
   };
 
   useEffect(() => {
-    const cleanup = listenForDataChanges(fetchLiquidations, ['CONTRACTS_UPDATED', 'ALL_UPDATED']);
-    const interval = setInterval(fetchLiquidations, 30_000);
+    const cleanup = listenForDataChanges(() => fetchLiquidations(true), ['CONTRACTS_UPDATED', 'ALL_UPDATED']);
+    const interval = setInterval(() => fetchLiquidations(true), 30_000);
     return () => {
       cleanup();
       clearInterval(interval);

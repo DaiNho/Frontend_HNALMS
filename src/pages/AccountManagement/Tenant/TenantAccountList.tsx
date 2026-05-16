@@ -68,9 +68,9 @@ export default function TenantAccountList() {
   const [coResidentsMap, setCoResidentsMap] = useState<Record<string, any[]>>({});
   const [loadingCoResidents, setLoadingCoResidents] = useState(false);
 
-  const fetchAccounts = useCallback(async () => {
+  const fetchAccounts = useCallback(async (isBackground = false) => {
     try {
-      setLoading(true);
+      if (!isBackground) setLoading(true);
       const response = await accountService.list("tenants", {
         offset: 0,
         limit: 9999,
@@ -84,13 +84,13 @@ export default function TenantAccountList() {
     } catch {
       showToast("error", "Lỗi kết nối", "Không thể tải danh sách cư dân!");
     } finally {
-      setLoading(false);
+      if (!isBackground) setLoading(false);
     }
   }, [showToast]);
 
   useEffect(() => {
-    const cleanup = listenForDataChanges(fetchAccounts, ['ACCOUNTS_UPDATED', 'ALL_UPDATED']);
-    const interval = setInterval(fetchAccounts, 30_000);
+    const cleanup = listenForDataChanges(() => fetchAccounts(true), ['ACCOUNTS_UPDATED', 'ALL_UPDATED']);
+    const interval = setInterval(() => fetchAccounts(true), 30_000);
     return () => {
       cleanup();
       clearInterval(interval);

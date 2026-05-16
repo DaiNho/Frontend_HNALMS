@@ -89,9 +89,9 @@ export default function CreatedAccountsList() {
     role: roleOptions[0]?.value || '',
   });
 
-  const fetchAccounts = useCallback(async () => {
+  const fetchAccounts = useCallback(async (isBackground = false) => {
     try {
-      setLoading(true);
+      if (!isBackground) setLoading(true);
       setError(null);
       const response = await accountService.list(accountGroup);
       if (response.success && response.data) {
@@ -105,13 +105,13 @@ export default function CreatedAccountsList() {
       setError(errObj?.response?.data?.message || 'Không thể tải danh sách');
       setAccounts([]);
     } finally {
-      setLoading(false);
+      if (!isBackground) setLoading(false);
     }
   }, [accountGroup]);
 
   useEffect(() => {
-    const cleanup = listenForDataChanges(fetchAccounts, ['ACCOUNTS_UPDATED', 'ALL_UPDATED']);
-    const interval = setInterval(fetchAccounts, 30_000);
+    const cleanup = listenForDataChanges(() => fetchAccounts(true), ['ACCOUNTS_UPDATED', 'ALL_UPDATED']);
+    const interval = setInterval(() => fetchAccounts(true), 30_000);
     return () => {
       cleanup();
       clearInterval(interval);
