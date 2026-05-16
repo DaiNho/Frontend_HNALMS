@@ -208,23 +208,29 @@ export default function CreateDeposit() {
         { withCredentials: true },
       );
 
-      if (response.data.success) {
-        toastr.success("Tạo cọc thành công!");
-        setBookingStep("success");
-      } else {
+      if (response.data?.success === false) {
+        // Server trả 2xx nhưng đánh dấu success: false
         toastr.error(
           "Có lỗi xảy ra khi tạo cọc: " +
           (response.data.message || "Unknown error"),
         );
+      } else {
+        // HTTP 2xx và success = true → thành công
+        toastr.success("Tạo cọc thành công!");
+        setBookingStep("success");
       }
     } catch (err: unknown) {
       console.error("Error creating deposit:", err);
-      const errorMessage = err instanceof Error ? err.message : "Unknown error";
-      const axiosError = err as { response?: { data?: { message?: string } } };
-      toastr.error(
-        "Có lỗi xảy ra: " +
-        (axiosError.response?.data?.message || errorMessage),
-      );
+      const axiosError = err as { response?: { data?: { message?: string }; status?: number } };
+      const serverMsg = axiosError.response?.data?.message;
+      const httpStatus = axiosError.response?.status;
+      if (serverMsg) {
+        toastr.error(`Lỗi ${httpStatus || ''}: ${serverMsg}`);
+      } else if (err instanceof Error) {
+        toastr.error("Lỗi kết nối: " + err.message);
+      } else {
+        toastr.error("Có lỗi xảy ra, vui lòng thử lại.");
+      }
     } finally {
       setIsSubmitting(false);
     }

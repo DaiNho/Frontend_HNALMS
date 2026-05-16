@@ -10,6 +10,7 @@ import { Pagination } from '../../components/common/Pagination';
 import { useToast } from '../../components/common/Toast';
 import { transferRequestService } from '../../services/requestService';
 import api from '../../services/api';
+import { listenForDataChanges, broadcastDataChange } from '../../utils/dataSync';
 import './TransferRequestsList.css';
 
 interface RoomType {
@@ -189,6 +190,15 @@ export default function TransferRequestsList() {
   useEffect(() => { fetchRequests(); }, [fetchRequests]);
   useEffect(() => { setCurrentPage(1); }, [statusFilter, search]);
 
+  useEffect(() => {
+    const cleanup = listenForDataChanges(fetchRequests, ['REQUESTS_UPDATED', 'ALL_UPDATED']);
+    const interval = setInterval(fetchRequests, 30_000);
+    return () => {
+      cleanup();
+      clearInterval(interval);
+    };
+  }, [fetchRequests]);
+
   const handleSearch = () => setSearch(searchInput);
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') handleSearch();
@@ -251,6 +261,7 @@ export default function TransferRequestsList() {
       fetchRequests();
       if (selectedRequest?._id === approvingRequest._id) setSelectedRequest(null);
       showToast('success', 'Thành công', 'Đã duyệt yêu cầu chuyển phòng.');
+      broadcastDataChange('REQUESTS_UPDATED');
     } catch (err: unknown) {
       const anyErr = err as { response?: { data?: { message?: string } } };
       showToast('error', 'Lỗi', anyErr?.response?.data?.message || 'Duyệt yêu cầu thất bại');
@@ -278,6 +289,7 @@ export default function TransferRequestsList() {
       fetchRequests();
       if (selectedRequest?._id === rejectingRequest._id) setSelectedRequest(null);
       showToast('success', 'Thành công', 'Đã từ chối yêu cầu chuyển phòng.');
+      broadcastDataChange('REQUESTS_UPDATED');
     } catch (err: unknown) {
       const anyErr = err as { response?: { data?: { message?: string } } };
       showToast('error', 'Lỗi', anyErr?.response?.data?.message || 'Từ chối yêu cầu thất bại');
@@ -378,6 +390,7 @@ export default function TransferRequestsList() {
       fetchRequests();
       if (selectedRequest?._id === releasingInvoiceRequest._id) setSelectedRequest(null);
       showToast('success', 'Thành công', 'Đã phát hành hóa đơn chuyển phòng.');
+      broadcastDataChange('REQUESTS_UPDATED');
     } catch (err: unknown) {
       const anyErr = err as { response?: { data?: { message?: string } } };
       showToast('error', 'Lỗi', anyErr?.response?.data?.message || 'Phát hành hóa đơn thất bại');
@@ -423,6 +436,7 @@ export default function TransferRequestsList() {
       fetchRequests();
 
       showToast('success', 'Thành công', 'Hoàn tất chuyển phòng thành công. Hợp đồng mới đã được tự động tạo.');
+      broadcastDataChange('REQUESTS_UPDATED');
     } catch (err: unknown) {
       const anyErr = err as { response?: { data?: { message?: string } } };
       showToast('error', 'Lỗi', anyErr?.response?.data?.message || 'Hoàn tất chuyển phòng thất bại');

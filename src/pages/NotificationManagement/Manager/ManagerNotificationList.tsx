@@ -5,6 +5,7 @@ import {
   Filter,
 } from 'lucide-react';
 import { notificationService } from '../../../services/notificationService';
+import { listenForDataChanges, broadcastDataChange } from '../../../utils/dataSync';
 import type { Notification } from '../../../types/notification.types';
 import '../NotificationManagement.css';
 
@@ -77,6 +78,16 @@ export default function ManagerNotificationList() {
     setCurrentPage(1);
   }, [searchTerm, activeTab, fromDate, toDate]);
 
+  useEffect(() => {
+    const cleanup = listenForDataChanges(fetchNotifications, ['NOTIFICATIONS_UPDATED', 'ALL_UPDATED']);
+    const interval = setInterval(fetchNotifications, 30_000);
+    return () => {
+      cleanup();
+      clearInterval(interval);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const formatDateTime = (dateStr: string) => {
     if (!dateStr) return '-';
     const d = new Date(dateStr);
@@ -121,12 +132,14 @@ export default function ManagerNotificationList() {
     setIsCreateModalOpen(false);
     setEditNotification(null);
     fetchNotifications();
+    broadcastDataChange('NOTIFICATIONS_UPDATED');
   };
 
   const handleDeleteSuccess = () => {
     setDeleteNotification(null);
     showToast('success', 'Thành công', 'Xóa thông báo thành công!');
     fetchNotifications();
+    broadcastDataChange('NOTIFICATIONS_UPDATED');
   };
 
   const handleConfirmPublish = async () => {
@@ -137,6 +150,7 @@ export default function ManagerNotificationList() {
       setPublishNotification(null);
       showToast('success', 'Thành công', 'Phát hành thông báo thành công!');
       fetchNotifications();
+      broadcastDataChange('NOTIFICATIONS_UPDATED');
     } catch (err: unknown) {
       const e = err as { response?: { data?: { message?: string } } };
       showToast('error', 'Lỗi', e.response?.data?.message || 'Không thể phát hành thông báo.');
@@ -151,6 +165,7 @@ export default function ManagerNotificationList() {
       setViewNotification(null);
       showToast('success', 'Thành công', 'Phát hành thông báo thành công!');
       fetchNotifications();
+      broadcastDataChange('NOTIFICATIONS_UPDATED');
     } catch (err: unknown) {
       const e = err as { response?: { data?: { message?: string } } };
       showToast('error', 'Lỗi', e.response?.data?.message || 'Không thể phát hành thông báo.');

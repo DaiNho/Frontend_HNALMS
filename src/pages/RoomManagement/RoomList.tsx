@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { roomService } from "../../services/roomService";
+import { listenForDataChanges } from "../../utils/dataSync";
 import FloorMap from "./RoomList/components/FloorMap";
 import FloorMapLevel2 from "./RoomList/components/FloorMapLevel2";
 import RoomFilters from "./RoomList/components/Room-filters";
@@ -97,6 +98,23 @@ export default function RoomList() {
 
     initializeDefaultFilter();
   }, []);
+
+  // Lắng nghe broadcast event và polling khi đã khởi tạo xong
+  useEffect(() => {
+    if (!isInitialized) return;
+
+    // BroadcastChannel: đồng bộ ngay giữa các tab
+    const cleanup = listenForDataChanges(fetchRooms, ['ROOMS_UPDATED', 'FLOORS_UPDATED', 'ROOM_TYPES_UPDATED']);
+
+    // Polling 30 giây: đồng bộ giữa các thiết bị khác nhau
+    const interval = setInterval(fetchRooms, 30_000);
+
+    return () => {
+      cleanup();
+      clearInterval(interval);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isInitialized]);
 
   // Helper to check conditions
   const showFloorMap = filters.selectedFloors.length === 1;

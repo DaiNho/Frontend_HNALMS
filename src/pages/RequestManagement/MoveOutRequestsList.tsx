@@ -8,6 +8,7 @@ import { AppModal } from '../../components/common/Modal';
 import { Pagination } from '../../components/common/Pagination';
 import { useToast } from '../../components/common/Toast';
 import { moveOutService } from '../../services/moveOutService';
+import { listenForDataChanges, broadcastDataChange } from '../../utils/dataSync';
 import './MoveOutRequestsList.css';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -204,6 +205,15 @@ export default function MoveOutRequestsList() {
   useEffect(() => { fetchRequests(); }, [fetchRequests]);
   useEffect(() => { setCurrentPage(1); }, [statusFilter, search]);
 
+  useEffect(() => {
+    const cleanup = listenForDataChanges(fetchRequests, ['REQUESTS_UPDATED', 'ALL_UPDATED']);
+    const interval = setInterval(fetchRequests, 30_000);
+    return () => {
+      cleanup();
+      clearInterval(interval);
+    };
+  }, [fetchRequests]);
+
   // ─── Helpers ─────────────────────────────────────────────────────────────
   const handleSearch = () => setSearch(searchInput);
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -385,6 +395,7 @@ export default function MoveOutRequestsList() {
       }
       fetchRequests();
       showToast('success', 'Thành công', 'Đã phát hành hóa đơn cuối thành công.');
+      broadcastDataChange('REQUESTS_UPDATED');
     } catch (err: unknown) {
       const anyErr = err as { response?: { data?: { message?: string } } };
       setReleaseError(anyErr?.response?.data?.message || 'Phát hành hóa đơn thất bại');
@@ -412,6 +423,7 @@ export default function MoveOutRequestsList() {
       fetchRequests();
       if (selectedRequest?._id === completingRequest._id) setSelectedRequest(null);
       showToast('success', 'Thành công', 'Đã hoàn tất quy trình trả phòng.');
+      broadcastDataChange('REQUESTS_UPDATED');
     } catch (err: unknown) {
       const anyErr = err as { response?: { data?: { message?: string } } };
       showToast('error', 'Thao tác thất bại', anyErr?.response?.data?.message || 'Hoàn tất trả phòng thất bại');

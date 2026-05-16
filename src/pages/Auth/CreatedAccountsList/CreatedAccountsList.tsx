@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { accountService, type AccountGroup } from '../../../services/accountService';
 import { useAuth } from '../../../context/AuthContext';
+import { listenForDataChanges, broadcastDataChange } from '../../../utils/dataSync';
 import './CreatedAccountsList.css';
 
 // Admin -> Owner | Owner -> Manager, Accountant
@@ -109,7 +110,12 @@ export default function CreatedAccountsList() {
   }, [accountGroup]);
 
   useEffect(() => {
-    fetchAccounts();
+    const cleanup = listenForDataChanges(fetchAccounts, ['ACCOUNTS_UPDATED', 'ALL_UPDATED']);
+    const interval = setInterval(fetchAccounts, 30_000);
+    return () => {
+      cleanup();
+      clearInterval(interval);
+    };
   }, [fetchAccounts]);
 
   useEffect(() => {
@@ -188,6 +194,7 @@ export default function CreatedAccountsList() {
         role: roleOptions[0]?.value || '',
       });
       fetchAccounts();
+      broadcastDataChange('ACCOUNTS_UPDATED');
     } catch (err: unknown) {
       console.error('Create account error:', err);
       const errObj = err as { response?: { data?: { message?: string } } };
@@ -237,6 +244,7 @@ export default function CreatedAccountsList() {
             acc._id === updated._id ? { ...acc, status: updated.status } : acc
           )
         );
+        broadcastDataChange('ACCOUNTS_UPDATED');
       }
 
       if (detailAccount?._id === accountId) {
@@ -269,6 +277,7 @@ export default function CreatedAccountsList() {
             acc._id === updated._id ? { ...acc, status: updated.status } : acc
           )
         );
+        broadcastDataChange('ACCOUNTS_UPDATED');
       }
 
       if (detailAccount?._id === accountId) {

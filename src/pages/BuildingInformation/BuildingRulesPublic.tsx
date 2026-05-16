@@ -21,6 +21,7 @@ import {
   updateBuildingRules,
   deleteBuildingRules,
 } from "../../services/buildingService";
+import { listenForDataChanges, broadcastDataChange } from "../../utils/dataSync";
 import "./BuildingRulesPublic.css";
 import { useToast } from "../../components/common/Toast";
 
@@ -73,7 +74,12 @@ const BuildingRulesPublic = () => {
   }>({ isOpen: false, type: null, index: null, title: "" });
 
   useEffect(() => {
-    fetchRules();
+    const cleanup = listenForDataChanges(fetchRules, ['RULES_UPDATED', 'ALL_UPDATED']);
+    const interval = setInterval(fetchRules, 30_000);
+    return () => {
+      cleanup();
+      clearInterval(interval);
+    };
   }, []);
 
   /**
@@ -104,6 +110,7 @@ const BuildingRulesPublic = () => {
       setIsEditing(false);
       fetchRules();
       showToast("success", "Lưu nội quy thành công!");
+      broadcastDataChange('RULES_UPDATED');
     } catch (err) {
       console.error("Error saving rules:", err);
       showToast("error", "Không thể lưu nội quy. Vui lòng thử lại.");
@@ -157,6 +164,7 @@ const BuildingRulesPublic = () => {
         setRulesData(updatedData);
         await fetchRules();
         showToast("success", "Xóa danh mục thành công!");
+        broadcastDataChange('RULES_UPDATED');
       } else if (type === "guideline") {
         const newGuidelines = rulesData.guidelines.filter((_, i) => i !== index);
         const updatedData = { ...rulesData, guidelines: newGuidelines };
@@ -166,6 +174,7 @@ const BuildingRulesPublic = () => {
         setRulesData(updatedData);
         await fetchRules();
         showToast("success", "Xóa hướng dẫn thành công!");
+        broadcastDataChange('RULES_UPDATED');
       }
     } catch (err) {
       console.error("Error deleting:", err);
@@ -208,6 +217,7 @@ const BuildingRulesPublic = () => {
       // Thông báo thành công
       const isNewCategory = editingCategory.index === undefined;
       showToast("success", isNewCategory ? "Thêm danh mục mới thành công!" : "Cập nhật danh mục thành công!");
+      broadcastDataChange('RULES_UPDATED');
     } catch (err) {
       console.error("Error saving category:", err);
       showToast("error", "Không thể lưu danh mục. Vui lòng thử lại.");
@@ -258,6 +268,7 @@ const BuildingRulesPublic = () => {
       // Thông báo thành công
       const isNewGuideline = editingGuideline.index === undefined;
       showToast("success", isNewGuideline ? "Thêm hướng dẫn mới thành công!" : "Cập nhật hướng dẫn thành công!");
+      broadcastDataChange('RULES_UPDATED');
     } catch (err) {
       console.error("Error saving guideline:", err);
       showToast("error", "Không thể lưu hướng dẫn. Vui lòng thử lại.");

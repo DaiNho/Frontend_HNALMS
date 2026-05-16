@@ -9,6 +9,7 @@ import {
   Wallet,
   DollarSign,
 } from "lucide-react";
+import { listenForDataChanges } from "../../../utils/dataSync";
 import "./AccountantDepositList.css";
 
 interface Room {
@@ -104,6 +105,15 @@ export default function AccountantDepositList() {
 
   useEffect(() => {
     fetchDeposits();
+  }, [fetchDeposits]);
+
+  useEffect(() => {
+    const cleanup = listenForDataChanges(fetchDeposits, ['DEPOSITS_UPDATED', 'ALL_UPDATED']);
+    const interval = setInterval(fetchDeposits, 30_000);
+    return () => {
+      cleanup();
+      clearInterval(interval);
+    };
   }, [fetchDeposits]);
 
   useEffect(() => {

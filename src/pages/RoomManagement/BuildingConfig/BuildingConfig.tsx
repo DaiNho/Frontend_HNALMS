@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import axios from "axios";
+import { broadcastDataChange } from '../../../utils/dataSync';
 import {
   Plus, Edit, Trash2, Layers, LayoutTemplate, BedDouble,
   X as LucideX, Building, Home, Tag, Upload, Eye,
@@ -159,6 +160,7 @@ const BuildingConfig = () => {
       }
       setShowFloorModal(false);
       fetchData();
+      broadcastDataChange('FLOORS_UPDATED');
     } catch (error: any) {
       const msg = error.response?.data?.message || error.response?.data?.error?.message || "Không thể lưu thông tin tầng.";
       showToast('error', "Lỗi", msg);
@@ -221,6 +223,7 @@ const BuildingConfig = () => {
       showToast('success', "Thành công", editingType ? "Đã cập nhật loại phòng." : "Đã thêm loại phòng mới.");
       setShowTypeModal(false);
       fetchData();
+      broadcastDataChange('ROOM_TYPES_UPDATED');
     } catch (err: any) {
       const msg = err.response?.data?.message || err.response?.data?.error?.message || err.message || "Lỗi lưu loại phòng";
       showToast('error', "Lỗi hệ thống", msg);
@@ -242,6 +245,7 @@ const BuildingConfig = () => {
       await axios.delete(`${API_BASE_URL}/${endpoint}/${deleteConfig.target._id}`);
       showToast('success', "Xóa thành công", `Đã xóa ${deleteConfig.type === 'FLOOR' ? 'tầng' : 'loại phòng'} thành công.`);
       fetchData();
+      broadcastDataChange(deleteConfig.type === 'FLOOR' ? 'FLOORS_UPDATED' : 'ROOM_TYPES_UPDATED');
       setShowDeleteModal(false);
     } catch (err: any) {
       const msg = err.response?.data?.message || err.response?.data?.error?.message || "Lỗi khi xóa dữ liệu.";

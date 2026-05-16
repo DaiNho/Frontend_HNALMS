@@ -24,6 +24,7 @@ import {
   type AccountDetail,
 } from '../constants';
 import { useToast } from '../../../components/common/Toast';
+import { listenForDataChanges, broadcastDataChange } from '../../../utils/dataSync';
 import '../OwnerAccountList.css';
 
 interface CreateFormData {
@@ -94,7 +95,12 @@ export default function OwnerAccountList() {
   }, [page]);
 
   useEffect(() => {
-    fetchAccounts();
+    const cleanup = listenForDataChanges(fetchAccounts, ['ACCOUNTS_UPDATED', 'ALL_UPDATED']);
+    const interval = setInterval(fetchAccounts, 30_000);
+    return () => {
+      cleanup();
+      clearInterval(interval);
+    };
   }, [fetchAccounts]);
 
   const filteredAccounts = useMemo(() => {
@@ -216,6 +222,7 @@ export default function OwnerAccountList() {
           ? `Tài khoản @${confirmModal.accountName} đã bị khóa thành công.`
           : `Tài khoản @${confirmModal.accountName} đã được mở lại.`,
       );
+      broadcastDataChange('ACCOUNTS_UPDATED');
     } catch (err) {
       const errObj = err as { response?: { data?: { message?: string } } };
       showToast(
@@ -263,6 +270,7 @@ export default function OwnerAccountList() {
       setCreateSuccess('Tạo tài khoản Chủ nhà thành công!');
       setShowCreateModal(false);
       fetchAccounts();
+      broadcastDataChange('ACCOUNTS_UPDATED');
       setTimeout(() => setCreateSuccess(null), 4000);
     } catch (err: unknown) {
       const errObj = err as { response?: { data?: { message?: string } } };

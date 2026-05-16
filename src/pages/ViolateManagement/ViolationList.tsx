@@ -16,6 +16,7 @@ import { Pagination } from '../../components/common/Pagination';
 import { useToast } from '../../components/common/Toast';
 import violateService, { type Violation, type CreateViolationPayload } from '../../services/violateService';
 import api from '../../services/api';
+import { listenForDataChanges, broadcastDataChange } from '../../utils/dataSync';
 import './ViolationList.css';
 
 interface Contract {
@@ -133,6 +134,15 @@ export default function ViolationList() {
 
   useEffect(() => {
     fetchViolations();
+  }, [fetchViolations]);
+
+  useEffect(() => {
+    const cleanup = listenForDataChanges(fetchViolations, ['VIOLATIONS_UPDATED', 'ALL_UPDATED']);
+    const interval = setInterval(fetchViolations, 30_000);
+    return () => {
+      cleanup();
+      clearInterval(interval);
+    };
   }, [fetchViolations]);
 
   useEffect(() => {
@@ -260,6 +270,7 @@ export default function ViolationList() {
         showToast('success', 'Thành công', 'Tạo vi phạm thành công!');
         closeCreateModal();
         fetchViolations();
+        broadcastDataChange('VIOLATIONS_UPDATED');
       }
     } catch (err: unknown) {
       console.error('Lỗi khi tạo vi phạm:', err);

@@ -14,6 +14,7 @@ import './ManageService.css';
 import { AppModal } from '../../components/common/Modal';
 import { Pagination } from '../../components/common/Pagination';
 import { useToast } from '../../components/common/Toast';
+import { listenForDataChanges, broadcastDataChange } from '../../utils/dataSync';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:9999/api';
 
@@ -90,6 +91,15 @@ const ManageService = () => {
     setCurrentPage(1);
   }, [searchTerm, filterType, filterPrice, sortOption]);
 
+  useEffect(() => {
+    const cleanup = listenForDataChanges(fetchServices, ['SERVICES_UPDATED', 'ALL_UPDATED']);
+    const interval = setInterval(fetchServices, 30_000);
+    return () => {
+      cleanup();
+      clearInterval(interval);
+    };
+  }, []);
+
   const processedServices = useMemo(() => {
     let result = [...services];
 
@@ -165,6 +175,7 @@ const ManageService = () => {
       }
 
       fetchServices();
+      broadcastDataChange('SERVICES_UPDATED');
       setShowDeleteModal(false);
       setItemToDelete(null);
     } catch {
@@ -184,6 +195,7 @@ const ManageService = () => {
       }
       setShowModal(false);
       fetchServices();
+      broadcastDataChange('SERVICES_UPDATED');
     } catch (e: unknown) {
       const err = e as { response?: { data?: { message?: string } } };
       const errorMessage = err.response?.data?.message || "Không thể lưu thông tin dịch vụ.";

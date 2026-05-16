@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import api from "../../../services/api";
+import { listenForDataChanges } from "../../../utils/dataSync";
 import "./ManagerDashboard.css";
 import {
   DoorOpen,
@@ -49,6 +50,16 @@ export default function ManagerDashboard() {
 
   useEffect(() => {
     loadDashboardData();
+  }, []);
+
+  // Lắng nghe sự kiện từ các tab khác + polling 30s
+  useEffect(() => {
+    const cleanup = listenForDataChanges(loadDashboardData);
+    const interval = setInterval(loadDashboardData, 30_000);
+    return () => {
+      cleanup();
+      clearInterval(interval);
+    };
   }, []);
 
   const loadDashboardData = async () => {

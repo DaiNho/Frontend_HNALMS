@@ -27,6 +27,7 @@ import {
   type AccountItem,
   type AccountDetail,
 } from '../constants';
+import { listenForDataChanges, broadcastDataChange } from '../../../utils/dataSync';
 import '../account-management.css';
 
 import { AppModal } from '../../../components/common/Modal';
@@ -102,7 +103,12 @@ export default function ManagerAccountList() {
   }, [currentPage, limit, showToast]);
 
   useEffect(() => {
-    fetchAccounts();
+    const cleanup = listenForDataChanges(fetchAccounts, ['ACCOUNTS_UPDATED', 'ALL_UPDATED']);
+    const interval = setInterval(fetchAccounts, 30_000);
+    return () => {
+      cleanup();
+      clearInterval(interval);
+    };
   }, [fetchAccounts]);
 
   const filteredAccounts = useMemo(() => {
@@ -160,6 +166,7 @@ export default function ManagerAccountList() {
           setDetailAccount((prev) => (prev ? { ...prev, status: updated?.status || prev.status } : prev));
         }
         showToast('success', 'Thành công', 'Tài khoản đã bị đóng.');
+        broadcastDataChange('ACCOUNTS_UPDATED');
       }
     } catch (err) {
       const errObj = err as { response?: { data?: { message?: string } } };
@@ -180,6 +187,7 @@ export default function ManagerAccountList() {
           setDetailAccount((prev) => (prev ? { ...prev, status: updated?.status || prev.status } : prev));
         }
         showToast('success', 'Thành công', 'Tài khoản đã được mở lại.');
+        broadcastDataChange('ACCOUNTS_UPDATED');
       }
     } catch (err) {
       const errObj = err as { response?: { data?: { message?: string } } };
@@ -213,6 +221,7 @@ export default function ManagerAccountList() {
       showToast('success', 'Thành công', 'Tạo tài khoản thành công!');
       setShowCreateModal(false);
       fetchAccounts();
+      broadcastDataChange('ACCOUNTS_UPDATED');
     } catch (err: unknown) {
       const errObj = err as { response?: { data?: { message?: string } } };
       showToast('error', 'Lỗi hệ thống', errObj?.response?.data?.message || 'Không thể tạo tài khoản');
@@ -235,6 +244,7 @@ export default function ManagerAccountList() {
       setShowDeleteConfirm(false);
       setAccountToDelete(null);
       fetchAccounts();
+      broadcastDataChange('ACCOUNTS_UPDATED');
     } catch (err) {
       const errObj = err as { response?: { data?: { message?: string } } };
       showToast('error', 'Lỗi', errObj?.response?.data?.message || 'Không thể xóa tài khoản.');

@@ -14,6 +14,7 @@ import { Pagination } from '../../components/common/Pagination';
 import { useToast } from '../../components/common/Toast';
 import { requestService } from '../../services/requestService';
 import { useAuth } from '../../hooks/useAuth';
+import { listenForDataChanges, broadcastDataChange } from '../../utils/dataSync';
 import './MaintenanceRequestsList.css';
 
 interface MaintenanceRequest {
@@ -110,6 +111,15 @@ export default function MaintenanceRequestsList() {
   }, [fetchRequests]);
 
   useEffect(() => {
+    const cleanup = listenForDataChanges(fetchRequests, ['REQUESTS_UPDATED', 'ALL_UPDATED']);
+    const interval = setInterval(fetchRequests, 30_000);
+    return () => {
+      cleanup();
+      clearInterval(interval);
+    };
+  }, [fetchRequests]);
+
+  useEffect(() => {
     setCurrentPage(1);
   }, [roomSearch, tenantSearch, statusFilter, sortOption]);
 
@@ -185,6 +195,7 @@ export default function MaintenanceRequestsList() {
         }
       }
       showToast('success', 'Thành công', 'Cập nhật trạng thái thành công!');
+      broadcastDataChange('REQUESTS_UPDATED');
     } catch (err: unknown) {
       console.error('Lỗi khi cập nhật trạng thái:', err);
       const e = err as { response?: { data?: { message?: string } } };
@@ -309,6 +320,7 @@ export default function MaintenanceRequestsList() {
       setPaymentForm({ financialTitle: '', financialAmount: '' });
       setPaymentFormErrors({ financialTitle: '', financialAmount: '' });
       showToast('success', 'Thành công', 'Tạo phiếu chi bảo trì thành công!');
+      broadcastDataChange('REQUESTS_UPDATED');
       setTimeout(() => { setSelectedRequest(null); }, 600);
     } catch (err: unknown) {
       const e = err as { response?: { data?: { message?: string } } };

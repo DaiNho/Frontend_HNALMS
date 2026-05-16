@@ -28,6 +28,7 @@ import { format as formatDate } from "date-fns";
 import CloseIcon from "@mui/icons-material/Close";
 import toastr from "toastr";
 import "toastr/build/toastr.min.css";
+import { broadcastDataChange } from "../../utils/dataSync";
 
 // Mock API URL - Replace with actual
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:9999/api";
@@ -1126,6 +1127,7 @@ const CreateContract = () => {
       if (res.data.success) {
         sessionStorage.removeItem("contractFormDraft");
         toastr.success(res.data.message);
+        broadcastDataChange('CONTRACTS_UPDATED');
         // Redirect
         navigate("/manager/contracts");
       }

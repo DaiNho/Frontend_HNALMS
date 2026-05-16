@@ -19,6 +19,7 @@ import { AppModal } from '../../components/common/Modal';
 import { Pagination } from '../../components/common/Pagination';
 import { useToast } from '../../components/common/Toast';
 import { requestService } from '../../services/requestService';
+import { listenForDataChanges, broadcastDataChange } from '../../utils/dataSync';
 import './RepairRequestsList.css';
 
 interface RepairRequest {
@@ -143,6 +144,15 @@ export default function RepairRequestsList() {
   }, [fetchRequests]);
 
   useEffect(() => {
+    const cleanup = listenForDataChanges(fetchRequests, ['REQUESTS_UPDATED', 'ALL_UPDATED']);
+    const interval = setInterval(fetchRequests, 30_000);
+    return () => {
+      cleanup();
+      clearInterval(interval);
+    };
+  }, [fetchRequests]);
+
+  useEffect(() => {
     setCurrentPage(1);
   }, [roomSearch, tenantSearch, statusFilter, sortOption]);
 
@@ -217,6 +227,7 @@ export default function RepairRequestsList() {
         }
       }
       showToast('success', 'Thành công', 'Cập nhật trạng thái thành công!');
+      broadcastDataChange('REQUESTS_UPDATED');
     } catch (err: unknown) {
       console.error('Lỗi khi cập nhật trạng thái:', err);
       const e = err as { response?: { data?: { message?: string } } };
@@ -378,6 +389,7 @@ export default function RepairRequestsList() {
       setCompleteForm({ invoiceTitle: '', invoiceTotalAmount: '' });
       setFormErrors({ invoiceTitle: '', invoiceTotalAmount: '' });
       showToast('success', 'Thành công', 'Tạo yêu cầu sửa chữa có phí thành công!');
+      broadcastDataChange('REQUESTS_UPDATED');
       setTimeout(() => { setSelectedRequest(null); }, 600);
     } catch (err: unknown) {
       const e = err as { response?: { data?: { message?: string } } };
@@ -458,6 +470,7 @@ export default function RepairRequestsList() {
       setFreeForm({ financialTitle: '', financialAmount: '' });
       setFreeFormErrors({ financialTitle: '', financialAmount: '' });
       showToast('success', 'Thành công', 'Tạo yêu cầu sửa chữa miễn phí thành công!');
+      broadcastDataChange('REQUESTS_UPDATED');
       setTimeout(() => { setSelectedRequest(null); }, 600);
     } catch (err: unknown) {
       const e = err as { response?: { data?: { message?: string } } };

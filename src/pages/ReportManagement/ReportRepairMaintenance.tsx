@@ -31,6 +31,7 @@ import type {
   MaintenanceMonthData,
   MaintenanceSnapshotData,
 } from "../../services/reportService";
+import { listenForDataChanges } from "../../utils/dataSync";
 import "./ReportRepairMaintenance.css";
 
 const MONTH_NAMES = [
@@ -116,7 +117,19 @@ export default function ReportRepairMaintenance() {
   }, []);
 
   // Load initial data on mount
-  useEffect(() => { loadData(currentMonthStr); }, [loadData, currentMonthStr]);
+  useEffect(() => {
+    loadData(currentMonthStr);
+  }, [loadData, currentMonthStr]);
+
+  // Sync listener & polling
+  useEffect(() => {
+    const cleanup = listenForDataChanges(() => loadData(selectedMonthStr), ['REQUESTS_UPDATED', 'ALL_UPDATED']);
+    const interval = setInterval(() => loadData(selectedMonthStr), 30_000);
+    return () => {
+      cleanup();
+      clearInterval(interval);
+    };
+  }, [loadData, selectedMonthStr]);
 
   const handleMonthChange = (monthStr: string) => {
     setSelectedMonthStr(monthStr);

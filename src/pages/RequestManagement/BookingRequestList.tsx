@@ -23,6 +23,7 @@ import {
   Ban,
 } from "lucide-react";
 import { useToast } from "../../components/common/Toast";
+import { listenForDataChanges, broadcastDataChange } from "../../utils/dataSync";
 import "./BookingRequestList.css";
 
 interface Room {
@@ -145,6 +146,24 @@ const BookingRequestList = () => {
 
   useEffect(() => {
     fetchRequests();
+  }, [fetchRequests]);
+
+  useEffect(() => {
+    const cleanup = listenForDataChanges(fetchRequests, ['REQUESTS_UPDATED', 'ALL_UPDATED']);
+    const interval = setInterval(fetchRequests, 30_000);
+    return () => {
+      cleanup();
+      clearInterval(interval);
+    };
+  }, [fetchRequests]);
+
+  useEffect(() => {
+    const cleanup = listenForDataChanges(fetchRequests, ['REQUESTS_UPDATED', 'ALL_UPDATED']);
+    const interval = setInterval(fetchRequests, 30_000);
+    return () => {
+      cleanup();
+      clearInterval(interval);
+    };
   }, [fetchRequests]);
 
   useEffect(() => {
@@ -334,6 +353,7 @@ const BookingRequestList = () => {
       setRejectReason("");
       showToast("success", "Từ chối thành công", "Đã từ chối yêu cầu và gửi email thông báo.");
       fetchRequests(true);
+      broadcastDataChange('REQUESTS_UPDATED');
     } catch (err: any) {
       showToast("error", "Từ chối thất bại", err?.response?.data?.message || "Vui lòng thử lại.");
     } finally {

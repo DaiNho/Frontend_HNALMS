@@ -27,6 +27,7 @@ import {
   type LiquidationItem,
   type LiquidationType,
 } from "../../services/liquidationService";
+import { listenForDataChanges, broadcastDataChange } from "../../utils/dataSync";
 import "./ContractLiquidationManagement.css";
 
 // ─────────────────────────────────────────────
@@ -639,7 +640,12 @@ const ContractLiquidationManagement: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchLiquidations();
+    const cleanup = listenForDataChanges(fetchLiquidations, ['CONTRACTS_UPDATED', 'ALL_UPDATED']);
+    const interval = setInterval(fetchLiquidations, 30_000);
+    return () => {
+      cleanup();
+      clearInterval(interval);
+    };
   }, []);
 
   // ── Filtered & paginated data ──
@@ -723,6 +729,7 @@ const ContractLiquidationManagement: React.FC = () => {
         setDetailModalOpen(false);
         setDetailItem(null);
         await fetchLiquidations();
+        broadcastDataChange('CONTRACTS_UPDATED');
       }
     } catch (err: any) {
       toastr.error(

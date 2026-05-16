@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import axios from "axios";
 import { Building as BuildingIcon } from "lucide-react";
+import { listenForDataChanges, broadcastDataChange } from "../../../utils/dataSync";
 
 import { useToast } from "../../../components/common/Toast";
 
@@ -200,6 +201,22 @@ const ManageRoom: React.FC<ManageRoomProps> = ({ readOnly = false }) => {
 
   useEffect(() => {
     fetchData();
+  }, []);
+
+  // Lắng nghe sự kiện từ các tab khác (owner thêm tầng/loại phòng/phòng)
+  useEffect(() => {
+    const cleanup = listenForDataChanges(fetchData, [
+      'FLOORS_UPDATED',
+      'ROOM_TYPES_UPDATED',
+      'ROOMS_UPDATED',
+    ]);
+    return cleanup;
+  }, []);
+
+  // Polling 30 giây — đồng bộ giữa các thiết bị khác nhau
+  useEffect(() => {
+    const interval = setInterval(fetchData, 30_000);
+    return () => clearInterval(interval);
   }, []);
 
   const getRoomTypeDetail = (idOrObj: string | RoomType | any) => {
@@ -677,6 +694,7 @@ const ManageRoom: React.FC<ManageRoomProps> = ({ readOnly = false }) => {
         });
         showToast("success", "Thành công", `Đã ${actionText} phòng ${room.name} thành công!`);
         fetchData();
+        broadcastDataChange('ROOMS_UPDATED');
       } catch (error: any) {
         showToast("error", "Lỗi cập nhật", "Lỗi cập nhật trạng thái: " + error.message);
       }
@@ -685,6 +703,7 @@ const ManageRoom: React.FC<ManageRoomProps> = ({ readOnly = false }) => {
         await axios.delete(`${API_BASE_URL}/rooms/${room._id}`);
         showToast("success", "Thành công", "Xóa phòng thành công!");
         fetchData();
+        broadcastDataChange('ROOMS_UPDATED');
       } catch (e: any) {
         showToast("error", "Lỗi xóa phòng", e.response?.data?.message || e.message);
       }
@@ -711,6 +730,7 @@ const ManageRoom: React.FC<ManageRoomProps> = ({ readOnly = false }) => {
       }
       setShowModal(false);
       fetchData();
+      broadcastDataChange('ROOMS_UPDATED');
     } catch (error: any) {
       showToast("error", "Lỗi lưu dữ liệu", error.response?.data?.message || error.message);
     }
@@ -1162,6 +1182,7 @@ const ManageRoom: React.FC<ManageRoomProps> = ({ readOnly = false }) => {
             setSelectedRooms([]);
             setMultiSelectMode(false);
             fetchData();
+            broadcastDataChange('CONTRACTS_UPDATED');
           }}
         />
       )}
@@ -2066,6 +2087,7 @@ const ManageRoom: React.FC<ManageRoomProps> = ({ readOnly = false }) => {
                 setActiveContractIdForLiquidation(null);
                 showToast("success", "Thành công", "Đã tạo yêu cầu thanh lý. Đang chờ chủ nhà duyệt.");
                 fetchData();
+                broadcastDataChange('CONTRACTS_UPDATED');
               }}
             />
           );

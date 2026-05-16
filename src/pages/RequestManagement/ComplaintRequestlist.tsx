@@ -11,6 +11,7 @@ import { AppModal } from '../../components/common/Modal';
 import { Pagination } from '../../components/common/Pagination';
 import { useToast } from '../../components/common/Toast';
 import { complaintService } from '../../services/complaintService';
+import { listenForDataChanges, broadcastDataChange } from '../../utils/dataSync';
 import './ComplaintRequestList.css';
 
 interface Complaint {
@@ -114,6 +115,15 @@ export default function ComplaintRequestList() {
   }, [statusFilter, categoryFilter]);
 
   useEffect(() => {
+    const cleanup = listenForDataChanges(fetchComplaints, ['REQUESTS_UPDATED', 'ALL_UPDATED']);
+    const interval = setInterval(fetchComplaints, 30_000);
+    return () => {
+      cleanup();
+      clearInterval(interval);
+    };
+  }, [statusFilter, categoryFilter]);
+
+  useEffect(() => {
     setPage(1);
   }, [tenantSearch, roomSearch, statusFilter, categoryFilter, sortOption]);
 
@@ -175,6 +185,7 @@ export default function ComplaintRequestList() {
         }
       }
       showToast('success', 'Thành công', 'Cập nhật trạng thái thành công!');
+      broadcastDataChange('REQUESTS_UPDATED');
     } catch (err: unknown) {
       console.error('Lỗi khi cập nhật trạng thái khiếu nại:', err);
       const e = err as { response?: { data?: { error?: { message?: string } } } };
@@ -266,6 +277,7 @@ export default function ComplaintRequestList() {
         statusNoteMode === 'Rejected' ? 'Đã từ chối' : 'Thành công',
         statusNoteMode === 'Rejected' ? 'Xác nhận từ chối khiếu nại thành công!' : 'Hoàn thành xử lý khiếu nại thành công!',
       );
+      broadcastDataChange('REQUESTS_UPDATED');
       setTimeout(() => { setSelectedComplaint(null); }, 600);
     } catch (err: unknown) {
       const e = err as { response?: { data?: { error?: { message?: string } } } };

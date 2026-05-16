@@ -12,6 +12,7 @@ import {
   CalendarDays,
 } from "lucide-react";
 import { cashFlowService } from "../../../services/cashFlowService";
+import { listenForDataChanges } from "../../../utils/dataSync";
 import "./receiptsList.css";
 
 interface ReceiptTicket {
@@ -92,6 +93,15 @@ export default function ReceiptsList() {
 
   useEffect(() => {
     fetchTickets();
+  }, [fetchTickets]);
+
+  useEffect(() => {
+    const cleanup = listenForDataChanges(fetchTickets, ['CASHFLOW_UPDATED', 'ALL_UPDATED']);
+    const interval = setInterval(fetchTickets, 30_000);
+    return () => {
+      cleanup();
+      clearInterval(interval);
+    };
   }, [fetchTickets]);
 
   const formatCurrency = (value: number | undefined) => {

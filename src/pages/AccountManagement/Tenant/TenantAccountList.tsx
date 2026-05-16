@@ -33,6 +33,7 @@ import {
   type AccountDetail,
 } from "../constants";
 import useAuth from "../../../hooks/useAuth";
+import { listenForDataChanges, broadcastDataChange } from "../../../utils/dataSync";
 import "../account-management.css";
 
 export default function TenantAccountList() {
@@ -88,7 +89,12 @@ export default function TenantAccountList() {
   }, [showToast]);
 
   useEffect(() => {
-    fetchAccounts();
+    const cleanup = listenForDataChanges(fetchAccounts, ['ACCOUNTS_UPDATED', 'ALL_UPDATED']);
+    const interval = setInterval(fetchAccounts, 30_000);
+    return () => {
+      cleanup();
+      clearInterval(interval);
+    };
   }, [fetchAccounts]);
 
   const fetchFloors = useCallback(async () => {
@@ -208,6 +214,7 @@ export default function TenantAccountList() {
           );
         }
         showToast("success", "Thành công", "Đã đóng tài khoản cư dân.");
+        broadcastDataChange('ACCOUNTS_UPDATED');
       }
     } catch {
       showToast("error", "Lỗi", "Không thể đóng tài khoản.");
@@ -234,6 +241,7 @@ export default function TenantAccountList() {
           );
         }
         showToast("success", "Thành công", "Đã mở lại tài khoản cư dân.");
+        broadcastDataChange('ACCOUNTS_UPDATED');
       }
     } catch {
       showToast("error", "Lỗi", "Không thể mở lại tài khoản.");

@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { cashFlowService } from "../../../services/cashFlowService";
 import { useToast } from "../../../components/common/Toast";
+import { listenForDataChanges, broadcastDataChange } from "../../../utils/dataSync";
 import "./managingIncomeExpenses.css";
 
 interface Room {
@@ -125,6 +126,15 @@ export default function ManagingIncomeExpenses() {
     fetchTickets();
   }, [fetchTickets]);
 
+  useEffect(() => {
+    const cleanup = listenForDataChanges(fetchTickets, ['CASHFLOW_UPDATED', 'ALL_UPDATED']);
+    const interval = setInterval(fetchTickets, 30_000);
+    return () => {
+      cleanup();
+      clearInterval(interval);
+    };
+  }, [fetchTickets]);
+
   const resetCreateForm = () => {
     setCreateForm({ title: "", amount: "" });
     setCreateErrors({ title: "", amount: "" });
@@ -193,6 +203,7 @@ export default function ManagingIncomeExpenses() {
         setCurrentPage(1);
         closeCreateModal();
         showToast("success", "Thành công", "Tạo phiếu chi thành công!");
+        broadcastDataChange('CASHFLOW_UPDATED');
       }
     } catch (err) {
       console.error("Lỗi khi tạo phiếu chi:", err);
@@ -214,6 +225,7 @@ export default function ManagingIncomeExpenses() {
         setTickets((prev) => prev.map((t) => (t._id === res.data._id ? res.data : t)));
         setSelectedTicket((prev) => (prev?._id === res.data._id ? res.data : prev));
         showToast("success", "Thành công", "Xác nhận đã chi tiền thành công!");
+        broadcastDataChange('CASHFLOW_UPDATED');
       }
     } catch (err) {
       console.error("Lỗi khi xác nhận đã thanh toán:", err);

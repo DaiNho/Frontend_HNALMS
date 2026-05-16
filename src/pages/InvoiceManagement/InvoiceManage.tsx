@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import axios from 'axios';
+import { listenForDataChanges, broadcastDataChange } from "../../utils/dataSync";
 import { format } from "date-fns";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -121,30 +122,16 @@ const InvoiceManager = () => {
 
   const { showToast } = useToast();
 
-  useEffect(() => {
-    fetchInvoices();
-    fetchServices();
-  }, []);
-
-  useEffect(() => {
-    setCurrentPage(1);
-    setSelectedInvoiceIds([]);
-  }, [searchTerm, filterStatus, filterType, sortConfig]);
-
-  useEffect(() => {
-    setBulkCurrentPage(1);
-  }, [bulkSearchTerm, bulkFilterStatus, bulkFilterFloor]);
-
-  const fetchServices = async () => {
+  const fetchServices = useCallback(async () => {
     try {
       const res = await axios.get(`${API_BASE_URL}/services`);
       setServices(res.data.data || []);
     } catch (error) {
       console.error("Lỗi khi tải danh sách dịch vụ", error);
     }
-  };
+  }, []);
 
-  const fetchInvoices = async () => {
+  const fetchInvoices = useCallback(async () => {
     setLoading(true);
     try {
       const [periodicRes, incurredRes] = await Promise.all([
@@ -165,13 +152,37 @@ const InvoiceManager = () => {
       showToast('error', 'Lỗi tải dữ liệu', 'Không thể tải danh sách hóa đơn.');
     }
     finally { setLoading(false); }
-  };
+  }, [showToast]);
+
+  useEffect(() => {
+    fetchInvoices();
+    fetchServices();
+  }, [fetchInvoices, fetchServices]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+    setSelectedInvoiceIds([]);
+  }, [searchTerm, filterStatus, filterType, sortConfig]);
+
+  useEffect(() => {
+    setBulkCurrentPage(1);
+  }, [bulkSearchTerm, bulkFilterStatus, bulkFilterFloor]);
+
+  useEffect(() => {
+    const cleanup = listenForDataChanges(fetchInvoices, ['INVOICES_UPDATED', 'ALL_UPDATED']);
+    const interval = setInterval(fetchInvoices, 30_000);
+    return () => {
+      cleanup();
+      clearInterval(interval);
+    };
+  }, [fetchInvoices]);
 
   const handleGenerateDrafts = async () => {
     try {
       const res = await axios.post(`${API_BASE_URL}/invoices/periodic/generate-drafts`);
       showToast('success', 'Thành công', res.data.message || "Khởi tạo hóa đơn thành công!");
       fetchInvoices();
+      broadcastDataChange('INVOICES_UPDATED');
     } catch (error: any) {
       showToast('error', 'Lỗi hệ thống', error.response?.data?.message || "Lỗi tạo hóa đơn");
     }
@@ -271,6 +282,7 @@ const InvoiceManager = () => {
       showToast('success', 'Thành công', 'Cập nhật chỉ số điện/nước thành công!');
       setShowReadingModal(false);
       fetchInvoices();
+      broadcastDataChange('INVOICES_UPDATED');
     } catch (error: any) {
       showToast('error', 'Lỗi lưu dữ liệu', error.response?.data?.message || "Lỗi lưu chỉ số");
     }
@@ -419,6 +431,7 @@ const InvoiceManager = () => {
       showToast('success', 'Thành công', `Đã lưu thành công ${apiCalls.length} bản ghi chỉ số!`);
       setShowBulkReadingModal(false);
       fetchInvoices();
+      broadcastDataChange('INVOICES_UPDATED');
     } catch (error: any) {
       showToast('error', 'Lỗi', 'Có lỗi xảy ra khi lưu chỉ số hàng loạt.');
     } finally {
@@ -432,6 +445,7 @@ const InvoiceManager = () => {
       await axios.put(`${API_BASE_URL}/invoices/${endpoint}/${id}/release`);
       showToast('success', 'Thành công', 'Phát hành hóa đơn thành công!');
       fetchInvoices();
+      broadcastDataChange('INVOICES_UPDATED');
     } catch (error: any) { showToast('error', 'Lỗi phát hành', error.response?.data?.message || "Lỗi phát hành"); }
   };
 
@@ -456,6 +470,7 @@ const InvoiceManager = () => {
 
       showToast('success', 'Thành công', `Đã phát hành thành công ${idsToRelease.length} hóa đơn!`);
       fetchInvoices();
+      broadcastDataChange('INVOICES_UPDATED');
     } catch (error: any) {
       showToast('error', 'Lỗi', 'Có lỗi xảy ra trong quá trình phát hành.');
     } finally {

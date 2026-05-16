@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import {
@@ -26,6 +26,7 @@ import {
   hasSuccessorContractAfterDeclinedTenant,
   isContractStartedByLocalCalendar,
 } from "../../utils/contractDates";
+import { listenForDataChanges, broadcastDataChange } from "../../utils/dataSync";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:9999/api";
 
@@ -139,8 +140,7 @@ const ContractList = ({ readOnly = false }: { readOnly?: boolean }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [actionPopup.show]);
 
-  useEffect(() => {
-    // Fetch rooms, contracts, deposits, and floors in parallel
+  const fetchData = useCallback(() => {
     Promise.all([
       axios.get(`${API_URL}/rooms`),
       axios.get(`${API_URL}/contracts`),
@@ -205,6 +205,19 @@ const ContractList = ({ readOnly = false }: { readOnly?: boolean }) => {
       })
       .catch((err) => console.error("Error fetching data:", err));
   }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  useEffect(() => {
+    const cleanup = listenForDataChanges(fetchData);
+    const interval = setInterval(fetchData, 30_000);
+    return () => {
+      cleanup();
+      clearInterval(interval);
+    };
+  }, [fetchData]);
 
   // Build a map: roomId -> contractId (only active contracts that have started)
   const roomContractMap: Record<string, string> = {};

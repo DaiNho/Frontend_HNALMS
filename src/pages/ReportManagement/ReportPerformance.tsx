@@ -21,6 +21,7 @@ import {
 } from "@mui/material";
 import { reportService } from "../../services/reportService";
 import type { VacancyMonthData, SnapshotData } from "../../services/reportService";
+import { listenForDataChanges } from "../../utils/dataSync";
 import "./ReportPerformance.css";
 
 const COLORS = {
@@ -95,8 +96,19 @@ export default function ReportPerformance() {
   }, []);
 
   // Load initial data once on mount
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { loadData(currentMonthStr); }, []);
+  useEffect(() => {
+    loadData(currentMonthStr);
+  }, [loadData, currentMonthStr]);
+
+  // Sync listener & polling
+  useEffect(() => {
+    const cleanup = listenForDataChanges(() => loadData(selectedMonthStr), ['ROOMS_UPDATED', 'CONTRACTS_UPDATED', 'ALL_UPDATED']);
+    const interval = setInterval(() => loadData(selectedMonthStr), 30_000);
+    return () => {
+      cleanup();
+      clearInterval(interval);
+    };
+  }, [loadData, selectedMonthStr]);
 
   const handleMonthChange = (monthStr: string) => {
     setSelectedMonthStr(monthStr);
