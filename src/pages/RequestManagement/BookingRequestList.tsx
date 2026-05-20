@@ -122,7 +122,7 @@ const BookingRequestList = () => {
 
   const fetchRequests = useCallback(async (silent = false) => {
     try {
-      if (!silent) if (!isBackground) setLoading(true);
+      if (!silent) setLoading(true);
       const responseData = await bookingRequestService.getAllBookingRequests();
       if (responseData.success) {
         setRequests(responseData.data);
@@ -140,7 +140,7 @@ const BookingRequestList = () => {
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Đã xảy ra lỗi");
     } finally {
-      if (!silent) if (!isBackground) setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, []);
 
