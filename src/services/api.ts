@@ -2,7 +2,7 @@ import axios from "axios";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:9999/api",
-  timeout: 30000, // 30s để hỗ trợ Render.com cold start (free tier ngủ sau 15p không dùng)
+  timeout: 120000, // 120s (2 phút) để hỗ trợ Render.com cold start và dữ liệu lớn
   headers: {
     "Content-Type": "application/json",
   },

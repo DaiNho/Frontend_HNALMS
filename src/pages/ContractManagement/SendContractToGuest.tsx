@@ -1075,8 +1075,8 @@ const SendContractToGuest = () => {
         const res = await api.post(`/booking-requests/${selectedDeposit._id}/send-payment`, sendPaymentPayload);
         if (res.data.success) {
           sessionStorage.removeItem("contractFormDraft");
-          showToast("success", "Thành công", "Đã chốt thông tin và gửi yêu cầu thanh toán (kèm QR) cho khách thành công!");
-          navigate("/manager/requests/bookings");
+          showToast("success", "Gửi thành công! 🎉", "Đã chốt thông tin và gửi yêu cầu thanh toán (kèm QR) cho khách. Đang chuyển về danh sách...");
+          setTimeout(() => navigate("/manager/requests/bookings"), 1500);
         }
       } else {
         payload.depositId = selectedDeposit._id;
@@ -1084,8 +1084,8 @@ const SendContractToGuest = () => {
         const res = await api.post(`/contracts/create`, payload);
         if (res.data.success) {
           sessionStorage.removeItem("contractFormDraft");
-          showToast("success", "Thành công", "Hợp đồng đã được tạo thành công!");
-          navigate("/manager/contracts");
+          showToast("success", "Tạo hợp đồng thành công! 🎉", "Hợp đồng đã được tạo và lưu thành công. Đang chuyển về danh sách...");
+          setTimeout(() => navigate("/manager/contracts"), 1500);
         }
       }
     } catch (err: any) {
