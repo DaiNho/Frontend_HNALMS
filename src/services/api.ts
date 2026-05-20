@@ -19,6 +19,8 @@ api.interceptors.request.use(
       "/roomtypes",
       "/floors",
       "/buildings",
+      "/buildings/rules",
+      "/buildings/rules/active",
       "/deposits",
       "/booking-requests",
     ];

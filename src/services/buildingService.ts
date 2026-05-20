@@ -13,7 +13,8 @@ export const getActiveBuildingRules = async () => {
     const response = await api.get("/buildings/rules/active");
     return response.data;
   } catch (error: any) {
-    throw error.response?.data || error;
+    // Throw the original axios error so callers can check error.response?.status
+    throw error;
   }
 };
 

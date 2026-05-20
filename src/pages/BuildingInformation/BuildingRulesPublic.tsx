@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import axios from "axios";
 import {
   Clock,
   Home,
@@ -15,15 +16,11 @@ import {
   CheckCircle,
 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
-import {
-  getActiveBuildingRules,
-  createBuildingRules,
-  updateBuildingRules,
-  deleteBuildingRules,
-} from "../../services/buildingService";
-import { listenForDataChanges, broadcastDataChange } from "../../utils/dataSync";
+import { broadcastDataChange } from "../../utils/dataSync";
 import "./BuildingRulesPublic.css";
 import { useToast } from "../../components/common/Toast";
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:9999/api";
 
 // Mapping icon từ tên string sang component
 const iconMap = {
@@ -74,38 +71,52 @@ const BuildingRulesPublic = () => {
   }>({ isOpen: false, type: null, index: null, title: "" });
 
   useEffect(() => {
-    const cleanup = listenForDataChanges(() => fetchRules(true), ['RULES_UPDATED', 'ALL_UPDATED']);
-    const interval = setInterval(() => fetchRules(true), 30_000);
-    return () => {
-      cleanup();
-      clearInterval(interval);
-    };
+    fetchRules();
   }, []);
 
-  /**
-   * Gọi API lấy dữ liệu nội quy từ backend
-   */
   const fetchRules = async (isBackground = false) => {
     try {
       if (!isBackground) setLoading(true);
-      const response = await getActiveBuildingRules();
-      setRulesData(response.data);
+      const res = await axios.get(`${API_BASE_URL}/buildings/rules/active`);
+      if (res.data && res.data.data) {
+        setRulesData(res.data.data);
+      } else {
+        handleEmptyRules();
+      }
       setError(null);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error fetching rules:", err);
-      setError("Không thể tải nội quy tòa nhà. Vui lòng thử lại sau.");
+      if (err?.response?.status === 404) {
+        handleEmptyRules();
+        setError(null);
+      } else {
+        setError("Không thể tải nội quy tòa nhà. Vui lòng thử lại sau.");
+      }
     } finally {
       if (!isBackground) setLoading(false);
     }
   };
 
-  // Xử lý lưu nội quy (Admin/Manager only)
+  const handleEmptyRules = () => {
+    // Nếu là admin thì khởi tạo mẫu rỗng để edit
+    if (isAdminOrManager) {
+      setRulesData({
+        importantNotice: { title: "Thông báo", content: "" },
+        categories: [],
+        guidelines: [],
+        contact: { phone: "", zalo: "" }
+      } as any);
+    } else {
+      setRulesData(null);
+    }
+  };
+
   const handleSaveRules = async () => {
     try {
       if (rulesData._id) {
-        await updateBuildingRules(rulesData._id, rulesData);
+        await axios.put(`${API_BASE_URL}/buildings/rules/${rulesData._id}`, rulesData);
       } else {
-        await createBuildingRules(rulesData);
+        await axios.post(`${API_BASE_URL}/buildings/rules`, rulesData);
       }
       setIsEditing(false);
       fetchRules();
@@ -159,7 +170,7 @@ const BuildingRulesPublic = () => {
         const newCategories = rulesData.categories.filter((_, i) => i !== index);
         const updatedData = { ...rulesData, categories: newCategories };
         if (rulesData._id) {
-          await updateBuildingRules(rulesData._id, updatedData);
+          await axios.put(`${API_BASE_URL}/buildings/rules/${rulesData._id}`, updatedData);
         }
         setRulesData(updatedData);
         await fetchRules();
@@ -169,7 +180,7 @@ const BuildingRulesPublic = () => {
         const newGuidelines = rulesData.guidelines.filter((_, i) => i !== index);
         const updatedData = { ...rulesData, guidelines: newGuidelines };
         if (rulesData._id) {
-          await updateBuildingRules(rulesData._id, updatedData);
+          await axios.put(`${API_BASE_URL}/buildings/rules/${rulesData._id}`, updatedData);
         }
         setRulesData(updatedData);
         await fetchRules();
@@ -202,19 +213,17 @@ const BuildingRulesPublic = () => {
       }
       const updatedData = { ...rulesData, categories: newCategories };
 
-      // Lưu vào database ngay
       if (rulesData._id) {
-        await updateBuildingRules(rulesData._id, updatedData);
+        await axios.put(`${API_BASE_URL}/buildings/rules/${rulesData._id}`, updatedData);
       } else {
-        await createBuildingRules(updatedData);
+        await axios.post(`${API_BASE_URL}/buildings/rules`, updatedData);
       }
 
       setRulesData(updatedData);
       setShowModal(false);
       setEditingCategory(null);
-      await fetchRules(); // Reload data từ server
+      await fetchRules();
 
-      // Thông báo thành công
       const isNewCategory = editingCategory.index === undefined;
       showToast("success", isNewCategory ? "Thêm danh mục mới thành công!" : "Cập nhật danh mục thành công!");
       broadcastDataChange('RULES_UPDATED');
@@ -253,19 +262,17 @@ const BuildingRulesPublic = () => {
       }
       const updatedData = { ...rulesData, guidelines: newGuidelines };
 
-      // Lưu vào database ngay
       if (rulesData._id) {
-        await updateBuildingRules(rulesData._id, updatedData);
+        await axios.put(`${API_BASE_URL}/buildings/rules/${rulesData._id}`, updatedData);
       } else {
-        await createBuildingRules(updatedData);
+        await axios.post(`${API_BASE_URL}/buildings/rules`, updatedData);
       }
 
       setRulesData(updatedData);
       setShowModal(false);
       setEditingGuideline(null);
-      await fetchRules(); // Reload data từ server
+      await fetchRules();
 
-      // Thông báo thành công
       const isNewGuideline = editingGuideline.index === undefined;
       showToast("success", isNewGuideline ? "Thêm hướng dẫn mới thành công!" : "Cập nhật hướng dẫn thành công!");
       broadcastDataChange('RULES_UPDATED');
