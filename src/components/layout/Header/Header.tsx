@@ -84,7 +84,7 @@ export default function Header() {
               <Link
                 key={item.to}
                 to={item.to}
-                className="header-nav-link"
+                className="header-nav-mobile-link"
                 onClick={() => setIsOpen(false)}
               >
                 {item.label}

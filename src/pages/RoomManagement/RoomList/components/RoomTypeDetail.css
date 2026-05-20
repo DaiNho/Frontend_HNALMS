@@ -220,3 +220,63 @@
 .rtd-action-button:hover {
   background-color: #059669;
 }
+
+/* ==========================================================================
+   CSS XOAY DỌC 90 ĐỘ CHO POPUP CHI TIẾT (BẮT BUỘC NGƯỜI DÙNG XOAY NGANG)
+   (Đồng bộ hướng với sơ đồ tầng 1/2/3/4/5)
+   ========================================================================== */
+@media (max-width: 768px) {
+  .room-type-detail-wrapper {
+    display: block !important;
+    position: relative !important;
+    width: 100% !important;
+    /* Chiều cao của wrapper bằng chiều rộng mong muốn của thẻ card khi nằm ngang */
+    height: 650px !important; 
+    overflow: hidden !important; 
+    margin: 0 !important; /* Xóa margin để nằm sát ngay dưới sơ đồ */
+  }
+
+  .room-type-detail-card {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    
+    /* Chuyển sang giao diện 2 CỘT ngang */
+    display: grid !important;
+    grid-template-columns: 300px 1fr !important;
+    
+    /* Chiều rộng siêu lớn, chiều cao cố định để cột chữ tự có thanh cuộn */
+    width: 650px !important;
+    max-width: 650px !important;
+    height: 350px !important;
+    
+    /* Dịch ngược 50% và xoay 90 độ */
+    transform: translate(-50%, -50%) rotate(90deg) !important;
+    transform-origin: center center !important;
+    margin: 0 !important;
+  }
+  
+  /* Cột ảnh bên trái */
+  .rtd-gallery-column {
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #e5e7eb;
+  }
+
+  .rtd-image-container {
+    height: 250px; /* Ảnh to chiếm phần lớn diện tích cột trái */
+  }
+
+  .rtd-thumbnails {
+    flex: 1; /* Thumbnails tự động lấp đầy phần dưới */
+    padding: 8px;
+    background: #f9fafb;
+  }
+
+  /* Cột nội dung bên phải, có thể cuộn */
+  .rtd-content {
+    max-height: 350px; /* Bằng đúng chiều cao của thẻ card */
+    overflow-y: auto; /* Tạo thanh cuộn cho chữ */
+    padding: 1rem;
+  }
+}

@@ -210,3 +210,93 @@
   z-index: 10;
   border: 2px solid white;
 }
+
+/* ==========================================================================
+   CSS XOAY DỌC 90 ĐỘ TẦNG 2/3/4/5 (BẮT BUỘC NGƯỜI DÙNG XOAY NGANG ĐIỆN THOẠI)
+   (Sử dụng thuật toán định vị Absolute Centering siêu chuẩn, không lệch, không đè)
+   ========================================================================== */
+@media (max-width: 768px) {
+  .floor-map-container.level-2 {
+    padding: 0.75rem !important;
+    border-radius: 0.5rem !important;
+  }
+
+  /* Khung chứa sơ đồ tầng 2/3/4/5: Chiều cao phải cực lớn để chứa sơ đồ 15 cột xoay dọc */
+  .map-layout-l2 {
+    display: block !important;
+    position: relative !important;
+    width: 100% !important;
+    height: 950px !important; /* Tăng từ 750px lên 950px để chứa lưới 880px */
+    overflow: hidden !important;
+    margin: 0 !important; /* Xóa margin để sát cạnh nhau */
+    padding: 0 !important;
+  }
+
+  /* Thuật toán xoay 90 độ hoàn hảo chính giữa */
+  .grid-l2 {
+    display: grid !important;
+    /* Bắt buộc 15 cột phải bằng nhau, không bị lồi lõm do text */
+    grid-template-columns: repeat(15, minmax(0, 1fr)) !important;
+    gap: 0.4rem 0.3rem !important;
+    
+    /* Tăng kích thước gốc để 15 cột không bị chèn ép text quá mức */
+    width: 880px !important;
+    
+    /* Đưa về tâm tuyệt đối của khung cha */
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    
+    /* Dịch ngược 50% kích thước bản thân và xoay 90 độ */
+    transform: translate(-50%, -50%) rotate(90deg) !important;
+    transform-origin: center center !important;
+    
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Giữ nguyên kích thước và tỷ lệ các phòng, không bị méo */
+  .floor-map-container.level-2 .room-node {
+    height: auto !important; /* Cho phép chiều cao tự co giãn theo nội dung nếu có text dài rớt dòng */
+    min-height: 3rem !important;
+    padding: 0.2rem 0.1rem !important;
+    border-radius: 0.375rem !important;
+  }
+
+  .floor-map-container.level-2 .room-node-name {
+    font-size: 0.65rem !important;
+    font-weight: 800 !important;
+  }
+
+  .floor-map-container.level-2 .room-expiry-label,
+  .floor-map-container.level-2 .room-contract-dates {
+    font-size: 0.45rem !important;
+    padding: 2px 1px !important;
+    margin-top: 2px !important;
+    white-space: normal !important; /* Ép xuống dòng */
+    word-break: break-all !important; /* Bẻ gãy chữ dài */
+    line-height: 1.1 !important;
+    max-width: 100% !important;
+    text-align: center !important;
+  }
+
+  /* Thang máy và khoảng cách ngăn cách thu nhỏ */
+  .separator-node {
+    font-size: 0.45rem !important;
+    padding: 2px !important;
+    border-radius: 3px !important;
+  }
+
+  .floor-map-container.level-2 .map-corridor {
+    font-size: 0.6rem !important;
+    padding: 0.25rem !important;
+  }
+
+  .deposited-badge {
+    width: 14px !important;
+    height: 14px !important;
+    font-size: 8px !important;
+    top: -4px !important;
+    right: -4px !important;
+  }
+}

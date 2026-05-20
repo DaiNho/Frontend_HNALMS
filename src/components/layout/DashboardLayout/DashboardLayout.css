@@ -30,4 +30,120 @@
   .dashboard-layout-body {
     margin-left: 0;
   }
+  .dashboard-layout-main {
+    border-radius: 0 !important;
+    padding: 8px !important;
+  }
+}
+
+/* Backdrop overlay cho mobile */
+.sidebar-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(4px);
+  z-index: 90;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ==========================================================================
+   CSS NÂNG CẤP RESPONSIVE CHO TOÀN BỘ MATERIAL UI COMPONENTS TRÊN MOBILE
+   (Chỉ kích hoạt khi ở màn hình di động, không ảnh hưởng đến Desktop)
+   ========================================================================== */
+@media (max-width: 1024px) {
+  /* Fix tràn ngang bảng dữ liệu của toàn bộ ứng dụng */
+  .MuiTableContainer-root {
+    overflow-x: auto !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    border-radius: 8px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+  }
+
+  .MuiTable-root {
+    min-width: 680px !important; /* Ép bảng có chiều rộng hợp lý để cuộn ngang mượt mà, không bị bóp nghẹt */
+  }
+
+  /* Thu nhỏ padding và font-size của các ô trong bảng để thông tin gọn đẹp */
+  .MuiTableCell-root {
+    padding: 8px 10px !important;
+    font-size: 13px !important;
+    white-space: nowrap !important; /* Tránh text dài tự ý xuống dòng làm nát bảng */
+  }
+
+  .MuiTableCell-head {
+    font-weight: 600 !important;
+    background-color: #f1f5f9 !important;
+  }
+
+  /* Fix các container bộ lọc/filters bị phình ngang hoặc dàn hàng quá dài */
+  .filter-container, .filters-wrapper, .search-filter-bar {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    width: 100% !important;
+  }
+
+  .filter-item, .filter-select, .search-input {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+@media (max-width: 600px) {
+  /* Fix tràn viền các Dialog/Popup của MUI trên di động */
+  .MuiDialog-paper {
+    margin: 12px !important;
+    max-width: calc(100% - 24px) !important;
+    width: 100% !important;
+    border-radius: 12px !important;
+  }
+
+  .MuiDialogContent-root {
+    padding: 16px 12px !important;
+  }
+
+  /* Thu nhỏ các title lớn để cân đối màn hình điện thoại */
+  .MuiTypography-h4 {
+    font-size: 1.4rem !important;
+    font-weight: 700 !important;
+  }
+  .MuiTypography-h5 {
+    font-size: 1.2rem !important;
+    font-weight: 600 !important;
+  }
+  .MuiTypography-h6 {
+    font-size: 1.05rem !important;
+    font-weight: 600 !important;
+  }
+
+  /* Giảm bớt padding của các thẻ Card để tối ưu không gian hiển thị */
+  .MuiPaper-root.MuiCard-root {
+    padding: 12px !important;
+    border-radius: 10px !important;
+  }
+
+  /* Tối ưu hóa các nút Action hàng loạt */
+  .action-buttons-group, .buttons-row {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  .action-buttons-group button, .buttons-row button {
+    width: 100% !important;
+  }
 }

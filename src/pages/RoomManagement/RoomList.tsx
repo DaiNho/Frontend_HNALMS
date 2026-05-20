@@ -395,15 +395,7 @@ export default function RoomList() {
                     <p>Không có phòng loại này tại {currentFloorLabel}</p>
                   </div>
                 ) : showTypeDetail ? (
-                  <div
-                    className="split-view-container"
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "minmax(0, 1fr) 320px",
-                      gap: "0.75rem",
-                      alignItems: "start",
-                    }}
-                  >
+                  <div className="split-view-container">
                     {(() => {
                       const selectedFloor = floorsData.find(
                         (f) => f._id === filters.selectedFloors[0],

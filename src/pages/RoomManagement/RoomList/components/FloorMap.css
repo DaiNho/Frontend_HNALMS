@@ -465,3 +465,123 @@
   z-index: 22;
   border: 2px solid #ffffff;
 }
+
+/* ==========================================================================
+   CSS XOAY DỌC 90 ĐỘ TẦNG 1 (BẮT BUỘC NGƯỜI DÙNG XOAY NGANG ĐIỆN THOẠI)
+   (Sử dụng thuật toán định vị Absolute Centering siêu chuẩn, không lệch, không đè)
+   ========================================================================== */
+@media (max-width: 768px) {
+  .floor-map-container {
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+  }
+
+  .map-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .map-legends-container {
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .map-legend {
+    justify-content: flex-start;
+    gap: 0.75rem;
+  }
+
+  /* Khung chứa sơ đồ: Chiều cao phải LỚN HƠN chiều rộng gốc của Grid để không bị cắt xén khi xoay dọc */
+  .map-layout {
+    display: block !important;
+    position: relative !important;
+    width: 100% !important;
+    height: 700px !important; /* Tăng chiều cao lên 700px để chứa thoải mái Grid 650px */
+    overflow: hidden !important; 
+    margin: 0 !important; /* Xóa margin để sát cạnh nhau */
+    padding: 0 !important;
+  }
+
+  /* Thuật toán xoay 90 độ hoàn hảo chính giữa */
+  .rooms-grid {
+    display: grid !important;
+    /* Dùng minmax(0, 1fr) để bắt buộc TẤT CẢ 8 cột phải bằng nhau, không bị phình to do text dài */
+    grid-template-columns: repeat(8, minmax(0, 1fr)) !important; 
+    grid-template-rows: repeat(4, auto) !important;
+    gap: 0.4rem !important;
+    
+    /* Tăng kích thước gốc lên 650px để các ô không bị ép quá hẹp */
+    width: 650px !important; 
+    
+    /* Đưa về tâm tuyệt đối của khung cha */
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    
+    /* Dịch ngược 50% kích thước bản thân và xoay 90 độ */
+    transform: translate(-50%, -50%) rotate(90deg) !important;
+    transform-origin: center center !important;
+    
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Ẩn khu vực nhà xe / sân phơi trên mobile để tối giản */
+  .map-sidebar-area {
+    display: none !important;
+  }
+
+  /* Tối ưu hóa kích thước ô phòng dọc đứng */
+  .room-node {
+    min-height: 3rem !important;
+    height: auto !important;
+    padding: 0.2rem 0.1rem !important;
+    border-radius: 0.375rem !important;
+  }
+
+  .room-node-name {
+    font-size: 0.7rem !important;
+    font-weight: 800 !important;
+  }
+
+  /* Thu nhỏ các badge ngày tháng và trạng thái cho vừa vặn */
+  .room-expiry-label,
+  .room-contract-dates,
+  .room-inactive-label,
+  .room-multi-options-date,
+  .room-guest-successor-booked {
+    font-size: 0.5rem !important;
+    padding: 2px 1px !important;
+    margin-top: 2px !important;
+    white-space: normal !important; /* Ép xuống dòng */
+    word-break: break-all !important; /* Chữ dài bắt buộc bị bẻ gãy xuống dòng */
+    line-height: 1.1 !important;
+    max-width: 100% !important;
+    text-align: center !important;
+  }
+
+  .room-inactive-badge {
+    font-size: 0.45rem !important;
+    padding: 1px 2px !important;
+    margin-top: 2px !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    text-align: center !important;
+  }
+
+  .deposited-badge {
+    width: 14px !important;
+    height: 14px !important;
+    font-size: 8px !important;
+    top: -4px !important;
+    right: -4px !important;
+  }
+  
+  .map-corridor {
+    font-size: 0.6rem !important;
+    padding: 0.25rem !important;
+    margin: 0.1rem 0 !important;
+  }
+}

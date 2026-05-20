@@ -90,92 +90,96 @@ export default function RoomTypeDetail({ room }: RoomTypeDetailProps) {
   const priceFormatted = formatPrice(rawPrice);
 
   return (
-    <div className="room-type-detail-card">
-      <div className="rtd-image-container">
-        <img
-          src={images[currentImageIndex]}
-          alt={`${room.title} - ${currentImageIndex + 1}`}
-          className="rtd-image"
-        />
+    <div className="room-type-detail-wrapper">
+      <div className="room-type-detail-card">
+        <div className="rtd-gallery-column">
+          <div className="rtd-image-container">
+            <img
+              src={images[currentImageIndex]}
+              alt={`${room.title} - ${currentImageIndex + 1}`}
+              className="rtd-image"
+            />
 
-        {/* Navigation Arrows (Only if multiple images) */}
-        {images.length > 1 && (
-          <>
-            <button className="rtd-nav-btn prev" onClick={handlePrev}>
-              <ChevronLeft size={14} />
-            </button>
-            <button className="rtd-nav-btn next" onClick={handleNext}>
-              <ChevronRight size={14} />
-            </button>
+            {/* Navigation Arrows (Only if multiple images) */}
+            {images.length > 1 && (
+              <>
+                <button className="rtd-nav-btn prev" onClick={handlePrev}>
+                  <ChevronLeft size={14} />
+                </button>
+                <button className="rtd-nav-btn next" onClick={handleNext}>
+                  <ChevronRight size={14} />
+                </button>
 
-            {/* Image Counter Badge */}
-            <div className="rtd-image-counter">
-              {currentImageIndex + 1}/{images.length}
-            </div>
-          </>
-        )}
-      </div>
-
-      {/* Thumbnails Strip */}
-      {images.length > 1 && (
-        <div className="rtd-thumbnails">
-          {images.map((img: string, idx: number) => (
-            <div
-              key={idx}
-              className={`rtd-thumbnail-item ${idx === currentImageIndex ? "active" : ""}`}
-              onClick={() => handleThumbnailClick(idx)}
-            >
-              <img src={img} alt={`Thumb ${idx}`} />
-            </div>
-          ))}
-        </div>
-      )}
-
-      <div className="rtd-content">
-        <h2 className="rtd-title">
-          Phòng {room.roomTypeId?.typeName || room.title || room.name}
-        </h2>
-
-        <div className="rtd-specs">
-          <div className="rtd-spec-row">
-            <span className="spec-label">Tầng:</span>
-            <span className="spec-value">
-              {room.floorLabel?.replace("Tầng ", "") || "1"}
-            </span>
-          </div>
-          <div className="rtd-spec-row">
-            <span className="spec-label">Diện tích:</span>
-            <span className="spec-value">{room.area}m²</span>
-          </div>
-          <div className="rtd-spec-row">
-            <span className="spec-label">Giá:</span>
-            <span className="spec-value price">{priceFormatted}</span>
-          </div>
-        </div>
-
-        {/* Description from DB */}
-        <div className="rtd-description">
-          <p>{room.description || "Chưa có mô tả cho loại phòng này."}</p>
-        </div>
-
-        <div className="rtd-amenities-section">
-          <p className="amenities-label">Thiết bị phòng:</p>
-          <div className="amenities-tags">
-            {loadingDevices ? (
-              <span className="amenity-tag" style={{ opacity: 0.6 }}>
-                Đang tải...
-              </span>
-            ) : devices.length > 0 ? (
-              devices.map((asset) => (
-                <span key={asset._id} className="amenity-tag">
-                  {asset.deviceId?.name || "N/A"}
-                </span>
-              ))
-            ) : (
-              <span className="amenity-tag" style={{ opacity: 0.6 }}>
-                Chưa có dữ liệu thiết bị
-              </span>
+                {/* Image Counter Badge */}
+                <div className="rtd-image-counter">
+                  {currentImageIndex + 1}/{images.length}
+                </div>
+              </>
             )}
+          </div>
+
+          {/* Thumbnails Strip */}
+          {images.length > 1 && (
+            <div className="rtd-thumbnails">
+              {images.map((img: string, idx: number) => (
+                <div
+                  key={idx}
+                  className={`rtd-thumbnail-item ${idx === currentImageIndex ? "active" : ""}`}
+                  onClick={() => handleThumbnailClick(idx)}
+                >
+                  <img src={img} alt={`Thumb ${idx}`} />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="rtd-content">
+          <h2 className="rtd-title">
+            Phòng {room.roomTypeId?.typeName || room.title || room.name}
+          </h2>
+
+          <div className="rtd-specs">
+            <div className="rtd-spec-row">
+              <span className="spec-label">Tầng:</span>
+              <span className="spec-value">
+                {room.floorLabel?.replace("Tầng ", "") || "1"}
+              </span>
+            </div>
+            <div className="rtd-spec-row">
+              <span className="spec-label">Diện tích:</span>
+              <span className="spec-value">{room.area}m²</span>
+            </div>
+            <div className="rtd-spec-row">
+              <span className="spec-label">Giá:</span>
+              <span className="spec-value price">{priceFormatted}</span>
+            </div>
+          </div>
+
+          {/* Description from DB */}
+          <div className="rtd-description">
+            <p>{room.description || "Chưa có mô tả cho loại phòng này."}</p>
+          </div>
+
+          <div className="rtd-amenities-section">
+            <p className="amenities-label">Thiết bị phòng:</p>
+            <div className="amenities-tags">
+              {loadingDevices ? (
+                <span className="amenity-tag" style={{ opacity: 0.6 }}>
+                  Đang tải...
+                </span>
+              ) : devices.length > 0 ? (
+                devices.map((asset) => (
+                  <span key={asset._id} className="amenity-tag">
+                    {asset.deviceId?.name || "N/A"}
+                  </span>
+                ))
+              ) : (
+                <span className="amenity-tag" style={{ opacity: 0.6 }}>
+                  Chưa có dữ liệu thiết bị
+                </span>
+              )}
+            </div>
           </div>
         </div>
       </div>

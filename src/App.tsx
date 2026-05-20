@@ -391,7 +391,7 @@ function LayoutWrapper() {
       {isGuestRoute && (
         <>
           <Footer />
-          <FloatingContact />
+          {(location.pathname === "/homepage" || location.pathname === "/") && <FloatingContact />}
         </>
       )}
     </>

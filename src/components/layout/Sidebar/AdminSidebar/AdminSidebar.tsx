@@ -28,7 +28,7 @@ const MENU_ITEMS = [
    
 ];
 
-const AdminSidebar = () => {
+const AdminSidebar = ({ isOpen, onClose }: { isOpen?: boolean; onClose?: () => void }) => {
     const [expandedMenus, setExpandedMenus] = useState<{ [key: number]: boolean }>({});
     const location = useLocation();
 
@@ -39,8 +39,14 @@ const AdminSidebar = () => {
         }));
     };
 
+    const handleLinkClick = () => {
+        if (onClose) {
+            onClose();
+        }
+    };
+
     return (
-        <aside className="sidebar-container">
+        <aside className={`sidebar-container ${isOpen ? 'mobile-open' : ''}`}>
             {/* Logo */}
             <div className="sidebar-logo">
                 <img src={logo} alt="Hoàng Nam Apartment" className="brand-logo" />
@@ -69,7 +75,7 @@ const AdminSidebar = () => {
                                             </span>
                                         </div>
                                     ) : (
-                                        <Link to={item.path} className="menu-link-content">
+                                        <Link to={item.path} className="menu-link-content" onClick={handleLinkClick}>
                                             <span className="menu-icon">{item.icon}</span>
                                             <span className="menu-title">{item.title}</span>
                                         </Link>
@@ -84,7 +90,7 @@ const AdminSidebar = () => {
                                                 <Link
                                                     key={subIndex}
                                                     to={sub.path}
-                                                    className={`submenu-item ${isActiveSub ? 'sub-active' : ''}`}
+                                                    className={`submenu-item ${isActiveSub ? 'sub-active' : ''}`} onClick={handleLinkClick}
                                                 >
                                                     <span className="dot">•</span> {sub.title}
                                                 </Link>

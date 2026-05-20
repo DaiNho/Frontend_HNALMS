@@ -36,10 +36,18 @@
 .button-default {
   background-color: #3579c6;
   color: #ffffff;
-  height: 2.5rem;
-  padding: 0.5rem 1.5rem;
+  height: 2.25rem; /* Thu nhỏ chút trên mobile */
+  padding: 0.25rem 0.75rem; /* Giảm padding ngang */
   border-radius: 0.5rem;
-  font-size: 1rem;
+  font-size: 0.85rem; /* Chữ nhỏ hơn trên mobile */
+}
+
+@media (min-width: 640px) {
+  .button-default {
+    height: 2.5rem;
+    padding: 0.5rem 1.5rem;
+    font-size: 1rem;
+  }
 }
 
 .button-default:hover:not(:disabled) {
@@ -77,8 +85,9 @@
   max-width: 1280px;
   margin-left: auto;
   margin-right: auto;
-  padding-left: 1.5rem;
-  padding-right: 1.5rem;
+  padding-left: 0.5rem; /* Đẩy sát lề trái trên mobile */
+  padding-right: 0.5rem; /* Đẩy sát lề phải trên mobile */
+  box-sizing: border-box;
 }
 
 @media (min-width: 640px) {
@@ -100,6 +109,7 @@
   align-items: center;
   justify-content: space-between;
   height: 4rem;
+  width: 100%;
 }
 
 /* Logo */
@@ -107,12 +117,20 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  min-width: 0; /* Cho phép co lại nếu hẹp */
 }
 
 .header-logo-img {
-  height: 3.5rem;
+  height: 2.5rem; /* Thu nhỏ logo một chút trên mobile */
   width: auto;
   object-fit: contain;
+  flex-shrink: 0;
+}
+
+@media (min-width: 640px) {
+  .header-logo-img {
+    height: 3.5rem;
+  }
 }
 
 .header-logo-icon {
@@ -123,6 +141,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .header-logo-text {
@@ -132,10 +151,19 @@
 }
 
 .header-logo-title {
-  font-size: 1.125rem;
+  font-size: 0.9rem; /* Chữ nhỏ hơn trên mobile để tránh tràn */
   font-weight: 700;
   color: #111827;
   display: inline;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (min-width: 640px) {
+  .header-logo-title {
+    font-size: 1.125rem;
+  }
 }
 
 /* Desktop Navigation */
@@ -342,9 +370,15 @@
 
 /* Mobile Navigation */
 .header-nav-mobile {
-  padding-bottom: 1rem;
-  padding-top: 0.5rem;
-  border-top: 1px solid hsl(var(--border));
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  background-color: #ffffff;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f1f5f9;
 }
 
 @media (min-width: 768px) {
@@ -355,20 +389,24 @@
 
 .header-nav-mobile-link {
   display: block;
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.95rem;
   font-weight: 500;
-  color: hsl(var(--foreground));
-  transition: color 0.2s;
+  color: #334155;
+  text-decoration: none;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
 }
 
-.header-nav-mobile-link:hover {
-  color: hsl(var(--primary));
+.header-nav-mobile-link:hover,
+.header-nav-mobile-link:active {
+  color: #3579c6;
+  background-color: #f8fafc;
 }
 
 .mobile-login {
   width: 100%;
-  margin-top: 1rem;
+  margin-top: 0.5rem;
 }
 
 .mobile-user {

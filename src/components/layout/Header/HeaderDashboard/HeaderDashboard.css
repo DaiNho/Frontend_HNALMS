@@ -276,7 +276,11 @@
 /* ========== Responsive ========== */
 @media (max-width: 1024px) {
   .manager-header {
-    padding: 0 16px;
+    padding: 0 12px; /* Giảm padding để lùi logo sát lề trái */
+    margin-left: 0;
+    border-radius: 0;
+    width: 100%;
+    box-sizing: border-box; /* Bắt buộc để tránh phình width quá 100% gây thanh cuộn ngang */
   }
 
   .header-right {
@@ -309,9 +313,28 @@
   }
 }
 
+@media (max-width: 576px) {
+  .user-info {
+    display: none !important;
+  }
+
+  .user-chevron {
+    display: none !important;
+  }
+
+  .header-divider {
+    display: none !important;
+  }
+
+  .user-profile {
+    padding: 4px !important;
+    background-color: transparent !important;
+  }
+}
+
 @media (max-width: 768px) {
   .manager-header {
-    padding: 0 12px;
+    padding: 0 8px; /* Đẩy sát lề trái và phải hơn nữa cho mobile */
   }
 
   .header-divider {
@@ -328,9 +351,34 @@
     font-size: 11px;
   }
 }
+.header-mobile-menu-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: none;
+  background-color: #f8fafc;
+  border-radius: 12px;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.header-mobile-menu-btn:hover {
+  background-color: #f0f7ff;
+  color: #3579c6;
+}
+
+@media (max-width: 1024px) {
+  .header-mobile-menu-btn {
+    display: flex;
+  }
+}
 
 @media (max-width: 480px) {
   .header-left {
-    display: none;
+    display: flex;
+    align-items: center;
   }
 }

@@ -1,11 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronDown, Settings, LogOut, User } from 'lucide-react';
+import { ChevronDown, Settings, LogOut, User, Menu } from 'lucide-react';
 import { useAuth } from '../../../../context/AuthContext';
 import HeaderNotification from './HeaderNotification';
 import './HeaderDashboard.css';
 
-const HeaderDashboard = () => {
+interface HeaderDashboardProps {
+    onMenuClick?: () => void;
+}
+
+const HeaderDashboard = ({ onMenuClick }: HeaderDashboardProps) => {
     const [showUserMenu, setShowUserMenu] = useState(false);
     const userRef = useRef<HTMLDivElement>(null);
 
@@ -61,7 +65,13 @@ const HeaderDashboard = () => {
 
     return (
         <header className="manager-header">
-            <div className="header-left"></div>
+            <div className="header-left">
+                {onMenuClick && (
+                    <button className="header-mobile-menu-btn" onClick={onMenuClick} aria-label="Open Menu">
+                        <Menu size={24} />
+                    </button>
+                )}
+            </div>
 
             <div className="header-right">
                 {/* User Profile */}

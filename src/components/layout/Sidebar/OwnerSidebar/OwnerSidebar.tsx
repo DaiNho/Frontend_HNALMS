@@ -104,7 +104,7 @@ const MENU_ITEMS = [
     },
 ];
 
-const OwnerSidebar = () => {
+const OwnerSidebar = ({ isOpen, onClose }: { isOpen?: boolean; onClose?: () => void }) => {
     const [expandedMenus, setExpandedMenus] = useState<{ [key: number]: boolean }>({});
     const location = useLocation();
 
@@ -115,8 +115,14 @@ const OwnerSidebar = () => {
         }));
     };
 
+    const handleLinkClick = () => {
+        if (onClose) {
+            onClose();
+        }
+    };
+
     return (
-        <aside className="owr-sb-container">
+        <aside className={`owr-sb-container ${isOpen ? 'mobile-open' : ''}`}>
             {/* Logo */}
             <div className="owr-sb-logo">
                 <img src={logo} alt="Hoàng Nam Apartment" className="owr-sb-brand-logo" />
@@ -148,7 +154,7 @@ const OwnerSidebar = () => {
                                             </span>
                                         </div>
                                     ) : (
-                                        <Link to={item.path} className="owr-sb-link-content">
+                                        <Link to={item.path} className="owr-sb-link-content" onClick={handleLinkClick}>
                                             <span className="owr-sb-icon">{item.icon}</span>
                                             <span className="owr-sb-title">{item.title}</span>
                                         </Link>
@@ -164,7 +170,7 @@ const OwnerSidebar = () => {
                                                 <Link
                                                     key={subIndex}
                                                     to={sub.path}
-                                                    className={`owr-sb-sub-item ${isActiveSub ? 'sub-active' : ''}`}
+                                                    className={`owr-sb-sub-item ${isActiveSub ? 'sub-active' : ''}`} onClick={handleLinkClick}
                                                 >
                                                     <span className="owr-sb-sub-icon">{sub.icon}</span>
                                                     {sub.title}

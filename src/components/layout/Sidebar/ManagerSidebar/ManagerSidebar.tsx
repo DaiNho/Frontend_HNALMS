@@ -114,7 +114,7 @@ const MENU_ITEMS = [
 
 ];
 
-const ManagerSidebar = () => {
+const ManagerSidebar = ({ isOpen, onClose }: { isOpen?: boolean; onClose?: () => void }) => {
   const [expandedMenus, setExpandedMenus] = useState<{ [key: number]: boolean }>({});
   const location = useLocation();
 
@@ -125,8 +125,14 @@ const ManagerSidebar = () => {
     }));
   };
 
+  const handleLinkClick = () => {
+    if (onClose) {
+      onClose();
+    }
+  };
+
   return (
-    <aside className="mgr-sb-container">
+    <aside className={`mgr-sb-container ${isOpen ? 'mobile-open' : ''}`}>
       {/* Logo */}
       <div className="mgr-sb-logo">
         <img src={logo} alt="Hoàng Nam Apartment" className="mgr-sb-brand-logo" />
@@ -158,7 +164,7 @@ const ManagerSidebar = () => {
                       </span>
                     </div>
                   ) : (
-                    <Link to={item.path} className="mgr-sb-link-content">
+                    <Link to={item.path} className="mgr-sb-link-content" onClick={handleLinkClick}>
                       <span className="mgr-sb-icon">{item.icon}</span>
                       <span className="mgr-sb-title">{item.title}</span>
                     </Link>
@@ -175,6 +181,7 @@ const ManagerSidebar = () => {
                           key={subIndex}
                           to={sub.path}
                           className={`mgr-sb-sub-item ${isActiveSub ? 'sub-active' : ''}`}
+                          onClick={handleLinkClick}
                         >
                           <span className="mgr-sb-sub-icon">{sub.icon}</span>
                           {sub.title}
